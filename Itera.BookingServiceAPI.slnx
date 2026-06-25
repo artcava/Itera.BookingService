@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Itera.BookingService.Api/Itera.BookingService.Api.csproj" />
+    <Project Path="src/Itera.BookingService.Application/Itera.BookingService.Application.csproj" />
+    <Project Path="src/Itera.BookingService.Contracts/Itera.BookingService.Contracts.csproj" />
+    <Project Path="src/Itera.BookingService.Infrastructure/Itera.BookingService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Itera.BookingService.Api.Tests/Itera.BookingService.Api.Tests.csproj" />
+  </Folder>
+</Solution>

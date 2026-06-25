@@ -1,0 +1,83 @@
+using FluentValidation;
+using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.Legacy.Branch;
+using Microsoft.Extensions.Logging;
+
+namespace Itera.BookingService.Application.Branch;
+
+public sealed class LegacyBranchService(
+    IValidator<WsGetAllFilialiRequest> allBranchesValidator,
+    IValidator<WsGetFilialeInfoRequest> infoBranchValidator,
+    IBranchInfoQueryService branchInfoQueryService,
+    ILogger<LegacyBranchService> logger) : ILegacyBranchService
+{
+    public async Task<WsResponse<List<WsFiliale>>> GetAllBranchesAsync(WsGetAllFilialiRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
+    {
+        var validation = await allBranchesValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return new WsResponse<List<WsFiliale>>
+            {
+                Esito = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio = validation.Errors.First().ErrorMessage,
+                Data = []
+            };
+        }
+
+        var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
+        var selectedDate = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateStart, linguaId);
+
+        var branches = await branchInfoQueryService.GetAllBranchesAsync(
+            authContext.BrandId,
+            request.GetExtraData,
+            request.GetFilialiExtra ?? false,
+            linguaId,
+            selectedDate,
+            cancellationToken);
+
+        logger.LogInformation("GetAllBranches resolved {Count} rows for WsUserID {WsUserID}", branches.Count, authContext.WsUserId);
+        return WsResponse<List<WsFiliale>>.Ok(branches);
+    }
+
+    public async Task<WsResponse<WsFiliale?>> GetInfoBranchAsync(WsGetFilialeInfoRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
+    {
+        var validation = await infoBranchValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return new WsResponse<WsFiliale?>
+            {
+                Esito = false,
+                CodiceErrore = LegacyErrorCodes.InvalidFilialeId.ToString(),
+                Messaggio = "Invalid BranchID parameter",
+                Data = null
+            };
+        }
+
+        var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
+        var selectedDate = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateStart, linguaId);
+
+        var result = await branchInfoQueryService.GetInfoBranchAsync(
+            authContext.BrandId,
+            request.BranchID,
+            request.GetFilialiExtra ?? false,
+            linguaId,
+            selectedDate,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return new WsResponse<WsFiliale?>
+            {
+                Esito = false,
+                CodiceErrore = LegacyErrorCodes.FilialeNotFound.ToString(),
+                Messaggio = "Filiale inesistente",
+                Data = null
+            };
+        }
+
+        logger.LogInformation("GetInfoBranch resolved for BranchID {BranchID} and WsUserID {WsUserID}", request.BranchID, authContext.WsUserId);
+        return WsResponse<WsFiliale?>.Ok(result);
+    }
+}
