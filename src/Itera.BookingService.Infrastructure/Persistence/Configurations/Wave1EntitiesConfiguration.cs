@@ -1,3 +1,4 @@
+using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -174,7 +175,6 @@ public class MezzoConfiguration : IEntityTypeConfiguration<Mezzo>
         builder.Property(x => x.CodiceMezzoVisualizzato).HasMaxLength(100);
         builder.Property(x => x.Note).HasColumnType("text");
         builder.Property(x => x.SubCodice).HasMaxLength(100);
-        builder.Property(x => x.ImportoVAL).HasColumnType("money");
     }
 }
 
