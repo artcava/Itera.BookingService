@@ -1,3 +1,3 @@
-// Il SecurityService usa proiezioni LINQ dirette — nessun profilo Mapster necessario.
-// File mantenuto come placeholder per eventuali mapping futuri (es. audit log, DTO interni).
+// File rimosso: il SecurityService usa proiezioni LINQ dirette, nessun profilo Mapster necessario.
+// Questo file verrà eliminato definitivamente in Issue #9 (cleanup finale).
 namespace Itera.BookingService.Infrastructure.Security.Mapping;
