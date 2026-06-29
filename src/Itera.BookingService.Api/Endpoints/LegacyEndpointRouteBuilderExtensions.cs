@@ -13,8 +13,8 @@ public static class LegacyEndpointRouteBuilderExtensions
     {
         MapBranchEndpoints(app);
         MapEstimateEndpoints(app);
-        MapSecurityEndpoints(app);
         MapVehicleEndpoints(app);
+        // Security endpoints registrati separatamente in Program.cs via MapSecurityEndpoints()
 
         return app;
     }
@@ -95,15 +95,6 @@ public static class LegacyEndpointRouteBuilderExtensions
         MapJsonEndpoint(group, "EstimateService", "GetInsuranceExtraFromEstimate", requiresToken: true);
         MapJsonEndpoint(group, "EstimateService", "GetAmountEstimate", requiresToken: true);
         MapJsonEndpoint(group, "EstimateService", "GetWholeEstimate", requiresToken: true);
-    }
-
-    private static void MapSecurityEndpoints(IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/SecurityService.svc").WithTags("SecurityService");
-
-        MapJsonEndpoint(group, "SecurityService", "GetToken", requiresToken: false);
-        MapJsonEndpoint(group, "SecurityService", "ValidateToken", requiresToken: false);
-        MapJsonEndpoint(group, "SecurityService", "ResetKeyCache", requiresToken: false);
     }
 
     private static void MapVehicleEndpoints(IEndpointRouteBuilder app)
