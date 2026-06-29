@@ -56,6 +56,7 @@ Il repo target (questo) è `artcava/Itera.BookingService`.
 - EF Core senza Migrations: lo schema DB legacy è la fonte di verità
 - Usare keyless query type per stored procedure e view
 - Nessuna scrittura diretta su tabelle core senza analisi preventiva dei side effect
+- **Valutazione keyless query type:** prima di introdurre un keyless type, verificare sempre se il risultato è ottenibile tramite entità normali già mappate (query LINQ con `.Include()` o proiezioni). Il keyless type va usato solo se la SP o la view non è riscrivibile in modo equivalente. Se l'analisi richiede visibilità sullo schema, richiedere esplicitamente gli script SQL della SP, della view o della struttura delle tabelle coinvolte.
 
 ### Endpoint
 
@@ -73,6 +74,7 @@ Il repo target (questo) è `artcava/Itera.BookingService`.
 4. Non fabricare fatti, log, comportamenti API o risultati di test.
 5. Spiegare sempre il razionale delle decisioni architetturali significative.
 6. Se i requisiti sono ambigui o la confidenza è bassa, porre domande di chiarimento prima di modifiche rischiose.
+7. **Per ciascun keyless query type, valutare sempre se è possibile sostituirlo con entità normali prima di introdurlo.** Se per l'analisi è necessario, richiedere esplicitamente gli script SQL che rappresentano il keyless type (stored procedure, view o struttura delle tabelle coinvolte).
 
 ---
 
