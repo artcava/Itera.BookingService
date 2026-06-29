@@ -90,7 +90,6 @@ Il repo target (questo) è `artcava/Itera.BookingService`.
 
 - `master` — branch principale, sempre deployabile
 - `develop` — branch di integrazione per la migrazione in corso
-- Feature branch: `feature/<issue-number>-<descrizione>` da `develop`
 
 ---
 
