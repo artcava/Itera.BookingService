@@ -1,0 +1,176 @@
+{
+  "info": {
+    "name": "Itera.BookingService — Token + Branch + Vehicle",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",  "value": "https://localhost:7001",              "type": "string" },
+    { "key": "token",    "value": "",                                     "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Security",
+      "item": [
+        {
+          "name": "GetToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.esito && json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "    pm.test('Token acquisito', () => pm.expect(json.data.token).to.be.a('string'));",
+                  "} else {",
+                  "    pm.test('GetToken fallito', () => pm.expect(json.esito).to.be.true);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/SecurityService.svc/GetToken", "host": ["{{baseUrl}}"], "path": ["SecurityService.svc", "GetToken"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Username\": \"utente_test\",\n  \"Password\": \"password_test\"\n}"
+            }
+          }
+        },
+        {
+          "name": "ValidateToken",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/SecurityService.svc/ValidateToken", "host": ["{{baseUrl}}"], "path": ["SecurityService.svc", "ValidateToken"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Token\": \"{{token}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "ValidateToken — token non valido (atteso Esito=false)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/SecurityService.svc/ValidateToken", "host": ["{{baseUrl}}"], "path": ["SecurityService.svc", "ValidateToken"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Token\": \"00000000-0000-0000-0000-000000000000\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. BranchService",
+      "item": [
+        {
+          "name": "GetAllBranches — token via header",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Api-Token",  "value": "{{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/BranchService.svc/GetAllBranches", "host": ["{{baseUrl}}"], "path": ["BranchService.svc", "GetAllBranches"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Language\": \"IT\",\n  \"DateStart\": null,\n  \"GetExtraData\": false,\n  \"GetFilialiExtra\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "GetAllBranches — token via payload (fallback)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/BranchService.svc/GetAllBranches", "host": ["{{baseUrl}}"], "path": ["BranchService.svc", "GetAllBranches"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Token\": \"{{token}}\",\n  \"Language\": \"IT\",\n  \"DateStart\": null,\n  \"GetExtraData\": false,\n  \"GetFilialiExtra\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "GetAllBranches — senza token (atteso 401/Esito=false)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/BranchService.svc/GetAllBranches", "host": ["{{baseUrl}}"], "path": ["BranchService.svc", "GetAllBranches"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Language\": \"IT\",\n  \"GetExtraData\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "GetInfoBranch",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Api-Token",  "value": "{{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/BranchService.svc/GetInfoBranch", "host": ["{{baseUrl}}"], "path": ["BranchService.svc", "GetInfoBranch"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"FilialeID\": 1,\n  \"Language\": \"IT\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. VehicleService",
+      "item": [
+        {
+          "name": "GetVehicle — token via header",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Api-Token",  "value": "{{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/VehicleService.svc/GetVehicle", "host": ["{{baseUrl}}"], "path": ["VehicleService.svc", "GetVehicle"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Token\": \"{{token}}\",\n  \"FleetMulti\": null,\n  \"SegmentoMulti\": null,\n  \"MezzoSpeciale\": null,\n  \"GruppoID\": null\n}"
+            }
+          }
+        },
+        {
+          "name": "GetVehicle — filtro per segmento",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Api-Token",  "value": "{{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/VehicleService.svc/GetVehicle", "host": ["{{baseUrl}}"], "path": ["VehicleService.svc", "GetVehicle"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Token\": \"{{token}}\",\n  \"FleetMulti\": null,\n  \"SegmentoMulti\": \"ECO\",\n  \"MezzoSpeciale\": false,\n  \"GruppoID\": null\n}"
+            }
+          }
+        },
+        {
+          "name": "GetVehicle — senza token (atteso Esito=false)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/VehicleService.svc/GetVehicle", "host": ["{{baseUrl}}"], "path": ["VehicleService.svc", "GetVehicle"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"FleetMulti\": null,\n  \"SegmentoMulti\": null\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

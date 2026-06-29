@@ -1,3 +1,4 @@
+using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Itera.BookingService.Infrastructure.Persistence;

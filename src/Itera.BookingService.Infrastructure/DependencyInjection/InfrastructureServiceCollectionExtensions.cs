@@ -1,9 +1,11 @@
 using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Security;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Infrastructure.Auth;
 using Itera.BookingService.Infrastructure.Branch;
 using Itera.BookingService.Infrastructure.Execution;
 using Itera.BookingService.Infrastructure.Persistence;
+using Itera.BookingService.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +50,9 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ILegacyEndpointExecutor, LegacyEndpointExecutor>();
         services.AddScoped<ITokenValidationService, LegacyTokenValidationService>();
         services.AddScoped<IBranchInfoQueryService, LegacyBranchInfoQueryService>();
+
+        // Security
+        services.AddScoped<ISecurityQueryService, SecurityQueryService>();
 
         return services;
     }
