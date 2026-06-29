@@ -3,7 +3,7 @@ name: Mirror to Azure DevOps
 on:
   push:
     branches:
-      - '**'
+      - master
     tags:
       - '**'
 
