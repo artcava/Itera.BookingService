@@ -5,7 +5,7 @@
             "name": "C#: Itera.BookingService (http)",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.csproj",
+            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.Api.csproj",
             "launchBrowser": {
                 "enabled": true,
                 "args": "http://localhost:5209/swagger",
@@ -31,7 +31,7 @@
             "name": "C#: Itera.BookingService (https)",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.csproj",
+            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.Api.csproj",
             "launchBrowser": {
                 "enabled": true,
                 "args": "https://localhost:7048/swagger",
