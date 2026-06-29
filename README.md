@@ -39,9 +39,9 @@ tests/
 
 ### Configurazione
 
-1. Clonare il repo e posizionarsi nella root:
+1. Clonare il repo da Azure DevOps e posizionarsi nella root:
    ```bash
-   git clone https://github.com/artcava/Itera.BookingService.git
+   git clone <AZURE_DEVOPS_REPO_URL>
    cd Itera.BookingService
    ```
 
