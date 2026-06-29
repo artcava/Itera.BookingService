@@ -1,4 +1,4 @@
-using Itera.BookingService.Application.Shared;
+using Itera.BookingService.Application.Security;
 using Itera.BookingService.Infrastructure.Persistence;
 using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -17,44 +17,40 @@ public sealed class SecurityQueryService : ISecurityQueryService
         _logger = logger;
     }
 
-    public async Task<Result<(int WsUserID, short BrandID)>> ValidateUserAsync(
+    public async Task<(int WsUserID, short BrandID)?> ValidateUserAsync(
         string username, string secretWord, CancellationToken ct)
     {
-        // Il legacy usa SecretWord in chiaro (varchar 50) — nessun hash applicativo.
-        // La validazione è una semplice query per Username + SecretWord.
         var user = await _db.WsUsers
             .AsNoTracking()
-            .Where(u => u.Username == username && u.SecretWord == secretWord)
+            .Where(u => u.Username == username && u.SecretWord == secretWord && u.BrandID != null)
             .Select(u => new { u.WsUserID, u.BrandID })
             .FirstOrDefaultAsync(ct);
 
-        if (user is null || user.BrandID is null)
+        if (user is null)
         {
-            _logger.LogWarning("ValidateUser fallito Username={Username}", username);
-            return Result<(int, short)>.Failure(
-                new ServiceError("INVALID_LOGIN", "Username o password non validi."));
+            _logger.LogWarning("ValidateUser: nessun utente trovato per Username={Username}", username);
+            return null;
         }
 
-        return Result<(int, short)>.Success((user.WsUserID, user.BrandID.Value));
+        return (user.WsUserID, user.BrandID!.Value);
     }
 
-    public async Task<Result<Guid>> CheckOrCreateTokenAsync(
+    public async Task<Guid?> CheckOrCreateTokenAsync(
         int wsUserID, short brandID, int tokenValidPeriodHours, CancellationToken ct)
     {
         var cutoff = DateTime.UtcNow.AddHours(-tokenValidPeriodHours);
 
-        // Cerca token valido esistente per questo utente e brand
         var existing = await _db.WsTokens
             .Where(t => t.WsUserID == wsUserID
                      && t.BrandID == brandID
                      && t.DataUltimaModifica >= cutoff)
             .OrderByDescending(t => t.DataUltimaModifica)
+            .Select(t => t.Token)
             .FirstOrDefaultAsync(ct);
 
-        if (existing is not null)
-            return Result<Guid>.Success(existing.Token);
+        if (existing != default)
+            return existing;
 
-        // Crea nuovo token
         var newToken = new WsToken
         {
             WsUserID = wsUserID,
@@ -69,18 +65,17 @@ public sealed class SecurityQueryService : ISecurityQueryService
         try
         {
             await _db.SaveChangesAsync(ct);
-            return Result<Guid>.Success(newToken.Token);
+            return newToken.Token;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "CheckOrCreateToken: errore salvataggio WsToken WsUserID={WsUserID}", wsUserID);
-            return Result<Guid>.Failure(
-                new ServiceError("TOKEN_GENERATION_ERROR", "Impossibile generare un token nuovo."));
+            return null;
         }
     }
 
-    public async Task<Result<short>> ValidateTokenAsync(
+    public async Task<short?> ValidateTokenAsync(
         Guid token, int tokenValidPeriodHours, CancellationToken ct)
     {
         var cutoff = DateTime.UtcNow.AddHours(-tokenValidPeriodHours);
@@ -88,13 +83,9 @@ public sealed class SecurityQueryService : ISecurityQueryService
         var record = await _db.WsTokens
             .AsNoTracking()
             .Where(t => t.Token == token && t.DataUltimaModifica >= cutoff)
-            .Select(t => new { t.BrandID })
+            .Select(t => (short?)t.BrandID)
             .FirstOrDefaultAsync(ct);
 
-        if (record is null)
-            return Result<short>.Failure(
-                new ServiceError("INVALID_TOKEN", "Token scaduto o non valido."));
-
-        return Result<short>.Success(record.BrandID);
+        return record;
     }
 }
