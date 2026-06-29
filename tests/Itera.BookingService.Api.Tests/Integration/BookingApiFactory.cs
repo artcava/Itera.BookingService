@@ -1,8 +1,10 @@
 using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Security.Dtos;
+using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Contracts.Legacy.Branch;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -16,9 +18,11 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 		{
 			services.RemoveAll<ITokenValidationService>();
 			services.RemoveAll<IBranchInfoQueryService>();
+			services.RemoveAll<ISecurityService>();
 
 			services.AddSingleton<ITokenValidationService, FakeTokenValidationService>();
 			services.AddSingleton<IBranchInfoQueryService, FakeBranchInfoQueryService>();
+			services.AddSingleton<ISecurityService, FakeSecurityService>();
 		});
 	}
 
@@ -54,6 +58,66 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 		}
 	}
 
+	private sealed class FakeSecurityService : ISecurityService
+	{
+		private static readonly Guid ValidToken = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001");
+
+		public Task<WsResponse<WsAuth>> GetTokenAsync(GetTokenRequest request, CancellationToken ct)
+		{
+			if (request.Username == "utente_ok" && request.Password == "password_ok")
+			{
+				return Task.FromResult(new WsResponse<WsAuth>
+				{
+					Esito = true,
+					CodiceErrore = LegacyErrorCodes.Success.ToString(),
+					Messaggio = string.Empty,
+					Data = new WsAuth { Token = ValidToken.ToString() }
+				});
+			}
+
+			return Task.FromResult(new WsResponse<WsAuth>
+			{
+				Esito = false,
+				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+				Messaggio = "Credenziali non valide",
+				Data = null
+			});
+		}
+
+		public Task<WsResponse<object?>> ValidateTokenAsync(ValidateTokenRequest request, CancellationToken ct)
+		{
+			if (request.Token == ValidToken.ToString())
+			{
+				return Task.FromResult(new WsResponse<object?>
+				{
+					Esito = true,
+					CodiceErrore = LegacyErrorCodes.Success.ToString(),
+					Messaggio = string.Empty,
+					Data = null
+				});
+			}
+
+			return Task.FromResult(new WsResponse<object?>
+			{
+				Esito = false,
+				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+				Messaggio = "Token non valido",
+				Data = null
+			});
+		}
+
+		public Task<WsResponse<object?>> ResetKeyCacheAsync(ResetKeyCacheRequest request, CancellationToken ct)
+		{
+			return Task.FromResult(new WsResponse<object?>
+			{
+				Esito = true,
+				CodiceErrore = LegacyErrorCodes.Success.ToString(),
+				Messaggio = string.Empty,
+				Data = null
+			});
+		}
+	}
+
 	private sealed class FakeBranchInfoQueryService : IBranchInfoQueryService
 	{
 		public Task<List<WsFiliale>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
@@ -81,8 +145,8 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 					StateID = 2,
 					ExcludeVAL = false,
 					ExtraData = getExtraData
-						? new WsFilialeExtraData { Address = "Via Appia 2", City = "Roma", Province = "RM", Region = "Lazio" }
-						: new WsFilialeExtraData()
+					? new WsFilialeExtraData { Address = "Via Appia 2", City = "Roma", Province = "RM", Region = "Lazio" }
+					: new WsFilialeExtraData()
 				}
 			};
 
