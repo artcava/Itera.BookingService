@@ -3,28 +3,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Itera.BookingService.Infrastructure.Persistence.Configurations;
 
-public class WsUserConfiguration : IEntityTypeConfiguration<WsUser>
-{
-    public void Configure(EntityTypeBuilder<WsUser> builder)
-    {
-        builder.ToTable("WsUser", "dbo");
-        builder.HasKey(x => x.WsUserID);
-    }
-}
-
-public class WsTokenConfiguration : IEntityTypeConfiguration<WsToken>
-{
-    public void Configure(EntityTypeBuilder<WsToken> builder)
-    {
-        builder.ToTable("WsToken", "dbo");
-        builder.HasKey(x => x.WsTokenID);
-        builder.Property(x => x.Token).HasColumnName("Token");
-        builder.Property(x => x.BrandID).HasColumnName("BrandID");
-        builder.Property(x => x.DataCreazione).HasColumnName("DataCreazione");
-        builder.Property(x => x.DataUltimaModifica).HasColumnName("DataUltimaModifica");
-    }
-}
-
 public class WsUserGruppoConfiguration : IEntityTypeConfiguration<WsUserGruppo>
 {
     public void Configure(EntityTypeBuilder<WsUserGruppo> builder)

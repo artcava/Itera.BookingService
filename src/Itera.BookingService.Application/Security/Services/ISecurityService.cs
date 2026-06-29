@@ -5,11 +5,7 @@ namespace Itera.BookingService.Application.Security.Services;
 
 public interface ISecurityService
 {
-    Task<WsResponse<LoginResponse>> LoginAsync(
-        LoginRequest request, CancellationToken ct = default);
-
-    Task<WsResponse<GetUserInfoResponse>> GetUserInfoAsync(
-        GetUserInfoRequest request,
-        LegacyAuthContext auth,
-        CancellationToken ct = default);
+    Task<WsResponse<WsAuth>> GetTokenAsync(GetTokenRequest request, CancellationToken ct = default);
+    Task<WsResponse<object>> ValidateTokenAsync(ValidateTokenRequest request, CancellationToken ct = default);
+    Task<WsResponse<object>> ResetKeyCacheAsync(ResetKeyCacheRequest request, CancellationToken ct = default);
 }

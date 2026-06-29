@@ -1,7 +1,6 @@
-using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Shared;
 using Itera.BookingService.Infrastructure.Persistence;
-using MapsterMapper;
+using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -9,93 +8,93 @@ namespace Itera.BookingService.Infrastructure.Security;
 
 public sealed class SecurityQueryService : ISecurityQueryService
 {
-    private readonly IteraDbContext _db;
-    private readonly IMapper _mapper;
+    private readonly LegacyDbContext _db;
     private readonly ILogger<SecurityQueryService> _logger;
 
-    public SecurityQueryService(
-        IteraDbContext db,
-        IMapper mapper,
-        ILogger<SecurityQueryService> logger)
+    public SecurityQueryService(LegacyDbContext db, ILogger<SecurityQueryService> logger)
     {
         _db = db;
-        _mapper = mapper;
         _logger = logger;
     }
 
-    public async Task<Result<LoginResponse>> AuthenticateAsync(
-        LoginRequest request, CancellationToken ct)
+    public async Task<Result<(int WsUserID, short BrandID)>> ValidateUserAsync(
+        string username, string secretWord, CancellationToken ct)
     {
-        // La password legacy è hashata con MD5 uppercase hex — replica fedele.
-        var passwordHash = ComputeMd5Hash(request.Password);
-
+        // Il legacy usa SecretWord in chiaro (varchar 50) — nessun hash applicativo.
+        // La validazione è una semplice query per Username + SecretWord.
         var user = await _db.WsUsers
             .AsNoTracking()
-            .Include(u => u.WsUserGruppos)
-            .Where(u => u.Username == request.Username
-                     && u.Password == passwordHash
-                     && u.CodiceFiliale == request.CodiceFiliale
-                     && u.Attivo == true)
+            .Where(u => u.Username == username && u.SecretWord == secretWord)
+            .Select(u => new { u.WsUserID, u.BrandID })
             .FirstOrDefaultAsync(ct);
 
-        if (user is null)
+        if (user is null || user.BrandID is null)
         {
-            _logger.LogWarning("Autenticazione fallita per Username={Username}", request.Username);
-            return Result<LoginResponse>.Failure(
-                new ServiceError("AUTH_FAILED", "Credenziali non valide o utente non attivo."));
+            _logger.LogWarning("ValidateUser fallito Username={Username}", username);
+            return Result<(int, short)>.Failure(
+                new ServiceError("INVALID_LOGIN", "Username o password non validi."));
         }
 
-        var token = GenerateLegacyToken(user.UserId, user.CodiceFiliale);
-        var gruppi = user.WsUserGruppos.Select(g => g.CodiceGruppo).ToList();
-
-        var response = new LoginResponse(
-            Token: token,
-            UserId: user.UserId,
-            Username: user.Username,
-            NomeCompleto: $"{user.Nome} {user.Cognome}".Trim(),
-            CodiceFiliale: user.CodiceFiliale,
-            Gruppi: gruppi);
-
-        return Result<LoginResponse>.Success(response);
+        return Result<(int, short)>.Success((user.WsUserID, user.BrandID.Value));
     }
 
-    public async Task<Result<WsUserDto>> GetUserInfoAsync(
-        string userId, CancellationToken ct)
+    public async Task<Result<Guid>> CheckOrCreateTokenAsync(
+        int wsUserID, short brandID, int tokenValidPeriodHours, CancellationToken ct)
     {
-        var user = await _db.WsUsers
-            .AsNoTracking()
-            .Include(u => u.WsUserGruppos)
-            .Include(u => u.WsUserListinos)
-                .ThenInclude(ul => ul.Listino)
-            .Where(u => u.UserId == userId)
+        var cutoff = DateTime.UtcNow.AddHours(-tokenValidPeriodHours);
+
+        // Cerca token valido esistente per questo utente e brand
+        var existing = await _db.WsTokens
+            .Where(t => t.WsUserID == wsUserID
+                     && t.BrandID == brandID
+                     && t.DataUltimaModifica >= cutoff)
+            .OrderByDescending(t => t.DataUltimaModifica)
             .FirstOrDefaultAsync(ct);
 
-        if (user is null)
-            return Result<WsUserDto>.Failure(
-                new ServiceError("USER_NOT_FOUND", "Utente non trovato."));
+        if (existing is not null)
+            return Result<Guid>.Success(existing.Token);
 
-        var dto = _mapper.Map<WsUserDto>(user);
-        return Result<WsUserDto>.Success(dto);
+        // Crea nuovo token
+        var newToken = new WsToken
+        {
+            WsUserID = wsUserID,
+            BrandID = brandID,
+            Token = Guid.NewGuid(),
+            DataCreazione = DateTime.UtcNow,
+            DataUltimaModifica = DateTime.UtcNow
+        };
+
+        _db.WsTokens.Add(newToken);
+
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+            return Result<Guid>.Success(newToken.Token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "CheckOrCreateToken: errore salvataggio WsToken WsUserID={WsUserID}", wsUserID);
+            return Result<Guid>.Failure(
+                new ServiceError("TOKEN_GENERATION_ERROR", "Impossibile generare un token nuovo."));
+        }
     }
 
-    // ---------------------------------------------------------------
-    // Helpers privati
-    // ---------------------------------------------------------------
-
-    private static string ComputeMd5Hash(string input)
+    public async Task<Result<short>> ValidateTokenAsync(
+        Guid token, int tokenValidPeriodHours, CancellationToken ct)
     {
-        var bytes = System.Security.Cryptography.MD5.HashData(
-            System.Text.Encoding.UTF8.GetBytes(input));
-        return Convert.ToHexString(bytes); // uppercase, come legacy
-    }
+        var cutoff = DateTime.UtcNow.AddHours(-tokenValidPeriodHours);
 
-    /// <summary>
-    /// Replica il token legacy: base64(userId|codiceFiliale|timestamp).
-    /// I client esistenti si aspettano questo formato.
-    /// </summary>
-    private static string GenerateLegacyToken(string userId, string codiceFiliale)
-    {
-        var raw = $"{userId}|{codiceFiliale}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
-        return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(raw));
+        var record = await _db.WsTokens
+            .AsNoTracking()
+            .Where(t => t.Token == token && t.DataUltimaModifica >= cutoff)
+            .Select(t => new { t.BrandID })
+            .FirstOrDefaultAsync(ct);
+
+        if (record is null)
+            return Result<short>.Failure(
+                new ServiceError("INVALID_TOKEN", "Token scaduto o non valido."));
+
+        return Result<short>.Success(record.BrandID);
     }
 }

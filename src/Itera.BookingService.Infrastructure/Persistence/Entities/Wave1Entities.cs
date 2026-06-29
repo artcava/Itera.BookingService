@@ -1,32 +1,5 @@
 namespace Itera.BookingService.Infrastructure.Persistence;
 
-public class WsUser
-{
-    public int WsUserID { get; set; }
-}
-
-public class WsToken
-{
-    public int WsTokenID { get; set; }
-    public int WsUserID { get; set; }
-    public Guid Token { get; set; }
-    public short BrandID { get; set; }
-    public DateTime? DataCreazione { get; set; }
-    public DateTime? DataUltimaModifica { get; set; }
-}
-
-public class WsUserGruppo
-{
-    public int WsUserGruppoID { get; set; }
-    public int WsUserID { get; set; }
-}
-
-public class WsUserListino
-{
-    public int WsUserListinoID { get; set; }
-    public int WsUserID { get; set; }
-}
-
 public class Filiale
 {
     public int FilialeID { get; set; }

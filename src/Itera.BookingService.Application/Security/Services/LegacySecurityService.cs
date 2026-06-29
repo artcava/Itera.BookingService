@@ -2,7 +2,7 @@ using FluentValidation;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Shared;
 using Itera.BookingService.Infrastructure.Security;
-using Itera.BookingService.Contracts.Legacy;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Security.Services;
@@ -10,67 +10,86 @@ namespace Itera.BookingService.Application.Security.Services;
 public sealed class LegacySecurityService : ISecurityService
 {
     private readonly ISecurityQueryService _query;
-    private readonly IValidator<LoginRequest> _loginValidator;
-    private readonly IValidator<GetUserInfoRequest> _userInfoValidator;
+    private readonly IValidator<GetTokenRequest> _getTokenValidator;
+    private readonly IValidator<ValidateTokenRequest> _validateTokenValidator;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<LegacySecurityService> _logger;
 
     public LegacySecurityService(
         ISecurityQueryService query,
-        IValidator<LoginRequest> loginValidator,
-        IValidator<GetUserInfoRequest> userInfoValidator,
+        IValidator<GetTokenRequest> getTokenValidator,
+        IValidator<ValidateTokenRequest> validateTokenValidator,
+        IConfiguration configuration,
         ILogger<LegacySecurityService> logger)
     {
         _query = query;
-        _loginValidator = loginValidator;
-        _userInfoValidator = userInfoValidator;
+        _getTokenValidator = getTokenValidator;
+        _validateTokenValidator = validateTokenValidator;
+        _configuration = configuration;
         _logger = logger;
     }
 
-    public async Task<WsResponse<LoginResponse>> LoginAsync(
-        LoginRequest request, CancellationToken ct = default)
+    public async Task<WsResponse<WsAuth>> GetTokenAsync(
+        GetTokenRequest request, CancellationToken ct = default)
     {
-        var validation = await _loginValidator.ValidateAsync(request, ct);
+        var validation = await _getTokenValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
         {
-            _logger.LogWarning("Login validazione fallita per Username={Username}", request.Username);
-            return WsResponse<LoginResponse>.ValidationError(validation);
+            _logger.LogWarning("GetToken validazione fallita Username={Username}", request.Username);
+            return WsResponse<WsAuth>.ValidationError(validation);
         }
 
-        _logger.LogInformation("Login richiesto per Username={Username} Filiale={Filiale}",
-            request.Username, request.CodiceFiliale);
-
-        var result = await _query.AuthenticateAsync(request, ct);
-
-        if (!result.IsSuccess)
+        var userResult = await _query.ValidateUserAsync(request.Username, request.Password, ct);
+        if (!userResult.IsSuccess)
         {
-            _logger.LogWarning("Login fallito per Username={Username} Errore={Errore}",
-                request.Username, result.Error.Message);
-            return WsResponse<LoginResponse>.Fail(result.Error);
+            _logger.LogWarning("GetToken credenziali non valide Username={Username}", request.Username);
+            return WsResponse<WsAuth>.Fail(userResult.Error);
         }
 
-        return WsResponse<LoginResponse>.Ok(result.Value!);
+        var (wsUserID, brandID) = userResult.Value;
+        int tokenHours = _configuration.GetValue<int?>("Security:TokenValidPeriodHours") ?? 24;
+
+        var tokenResult = await _query.CheckOrCreateTokenAsync(wsUserID, brandID, tokenHours, ct);
+        if (!tokenResult.IsSuccess)
+        {
+            _logger.LogError("GetToken generazione token fallita WsUserID={WsUserID}", wsUserID);
+            return WsResponse<WsAuth>.Fail(tokenResult.Error);
+        }
+
+        _logger.LogInformation("GetToken completato WsUserID={WsUserID} BrandID={BrandID}", wsUserID, brandID);
+        return WsResponse<WsAuth>.Ok(new WsAuth(tokenResult.Value.ToString()));
     }
 
-    public async Task<WsResponse<GetUserInfoResponse>> GetUserInfoAsync(
-        GetUserInfoRequest request,
-        LegacyAuthContext auth,
-        CancellationToken ct = default)
+    public async Task<WsResponse<object>> ValidateTokenAsync(
+        ValidateTokenRequest request, CancellationToken ct = default)
     {
-        var validation = await _userInfoValidator.ValidateAsync(request, ct);
+        var validation = await _validateTokenValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
+            return WsResponse<object>.ValidationError(validation);
+
+        var tokenGuid = Guid.Parse(request.Token);
+        int tokenHours = _configuration.GetValue<int?>("Security:TokenValidPeriodHours") ?? 24;
+
+        var result = await _query.ValidateTokenAsync(tokenGuid, tokenHours, ct);
+        if (!result.IsSuccess)
         {
-            _logger.LogWarning("GetUserInfo validazione fallita UserId={UserId}", request.UserId);
-            return WsResponse<GetUserInfoResponse>.ValidationError(validation);
+            _logger.LogWarning("ValidateToken token non valido o scaduto Token={Token}", request.Token);
+            return WsResponse<object>.Fail(result.Error);
         }
 
-        _logger.LogInformation("GetUserInfo per UserId={UserId} richiesto da {RequesterId}",
-            request.UserId, auth.UserId);
+        return WsResponse<object>.Ok(null);
+    }
 
-        var result = await _query.GetUserInfoAsync(request.UserId, ct);
+    public Task<WsResponse<object>> ResetKeyCacheAsync(
+        ResetKeyCacheRequest request, CancellationToken ct = default)
+    {
+        // La cache SQL del legacy (CacheHelper.EliminaTagCacheQuery) non ha equivalente
+        // in .NET 10. L'operazione è un no-op documentato: i client che la invocano
+        // ricevono risposta di successo senza side-effect.
+        _logger.LogInformation(
+            "ResetKeyCache invocato (no-op in .NET 10) KeySqlCache={KeySqlCache}",
+            request.KeySqlCache ?? "<null>");
 
-        if (!result.IsSuccess)
-            return WsResponse<GetUserInfoResponse>.Fail(result.Error);
-
-        return WsResponse<GetUserInfoResponse>.Ok(new GetUserInfoResponse(result.Value!));
+        return Task.FromResult(WsResponse<object>.Ok(null));
     }
 }

@@ -10,39 +10,52 @@ public static class SecurityEndpoints
     public static IEndpointRouteBuilder MapSecurityEndpoints(
         this IEndpointRouteBuilder app)
     {
-        // Login — pre-auth, NON applica LegacyTokenEndpointFilter
-        app.MapPost("/SecurityService.svc/Login",
+        // GetToken — pre-auth, nessun LegacyTokenEndpointFilter
+        app.MapPost("/SecurityService.svc/GetToken",
             async (
-                [FromBody] LoginRequest request,
-                ISecurityService securityService,
+                [FromBody] GetTokenRequest request,
+                ISecurityService svc,
                 CancellationToken ct) =>
             {
-                var response = await securityService.LoginAsync(request, ct);
+                var response = await svc.GetTokenAsync(request, ct);
                 return response.ToHttpResult();
             })
-            .WithName("Security_Login")
+            .WithName("Security_GetToken")
             .WithTags("Security")
-            .Produces<WsResponse<LoginResponse>>()
+            .Produces<WsResponse<WsAuth>>()
             .ProducesProblem(400)
             .AllowAnonymous();
 
-        // GetUserInfo — richiede token valido
-        app.MapPost("/SecurityService.svc/GetUserInfo",
+        // ValidateToken — pre-auth (valida il token in ingresso, non ne richiede uno)
+        app.MapPost("/SecurityService.svc/ValidateToken",
             async (
-                [FromBody] GetUserInfoRequest request,
-                ISecurityService securityService,
-                HttpContext httpContext,
+                [FromBody] ValidateTokenRequest request,
+                ISecurityService svc,
                 CancellationToken ct) =>
             {
-                var auth = httpContext.GetLegacyAuthContext();
-                var response = await securityService.GetUserInfoAsync(request, auth, ct);
+                var response = await svc.ValidateTokenAsync(request, ct);
                 return response.ToHttpResult();
             })
-            .WithName("Security_GetUserInfo")
+            .WithName("Security_ValidateToken")
+            .WithTags("Security")
+            .Produces<WsResponse<object>>()
+            .ProducesProblem(400)
+            .AllowAnonymous();
+
+        // ResetKeyCache — richiede token valido
+        app.MapPost("/SecurityService.svc/ResetKeyCache",
+            async (
+                [FromBody] ResetKeyCacheRequest request,
+                ISecurityService svc,
+                CancellationToken ct) =>
+            {
+                var response = await svc.ResetKeyCacheAsync(request, ct);
+                return response.ToHttpResult();
+            })
+            .WithName("Security_ResetKeyCache")
             .WithTags("Security")
             .AddEndpointFilter<LegacyTokenEndpointFilter>()
-            .Produces<WsResponse<GetUserInfoResponse>>()
-            .ProducesProblem(400)
+            .Produces<WsResponse<object>>()
             .ProducesProblem(401);
 
         return app;
