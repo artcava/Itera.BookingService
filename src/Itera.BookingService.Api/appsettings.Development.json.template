@@ -1,0 +1,26 @@
+{
+  "ConnectionStrings": {
+    "LegacyMain": "Server=<DEV_SERVER>;Database=RentalSoftware;User Id=<USERNAME>;Password=<PASSWORD>;TrustServerCertificate=True"
+  },
+  "LegacyInfrastructure": {
+    "EnableDetailedErrors": true,
+    "CommandTimeoutSeconds": 60
+  },
+  "LegacyAuth": {
+    "HeaderName": "X-Api-Token",
+    "TokenValidPeriodHours": 24,
+    "EnablePayloadTokenFallback": true
+  },
+  "ApplicationInsights": {
+    "ConnectionString": ""
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Information",
+        "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+      }
+    }
+  }
+}
