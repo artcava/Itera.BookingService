@@ -71,7 +71,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 					Esito = true,
 					CodiceErrore = LegacyErrorCodes.Success.ToString(),
 					Messaggio = string.Empty,
-					Data = new WsAuth { Token = ValidToken.ToString() }
+					Data = new WsAuth(ValidToken.ToString())
 				});
 			}
 
