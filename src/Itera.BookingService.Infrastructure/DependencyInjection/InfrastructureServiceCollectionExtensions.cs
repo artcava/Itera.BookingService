@@ -1,5 +1,5 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Application.Security.Services;
+using Itera.BookingService.Application.Security;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Infrastructure.Auth;
 using Itera.BookingService.Infrastructure.Branch;
