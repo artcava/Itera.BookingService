@@ -8,9 +8,11 @@ namespace Itera.BookingService.Api.Tests.Integration;
 public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
 {
     private readonly HttpClient _client;
+    private readonly BookingApiFactory _factory;
 
     public LegacyRoutesTests(BookingApiFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
         _client.DefaultRequestHeaders.Remove("X-Api-Token");
         _client.DefaultRequestHeaders.Add("X-Api-Token", "test-token");
@@ -155,15 +157,15 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     [Fact]
     public async Task Security_Endpoints_Are_Accessible_Without_Token_Header()
     {
-        using var client = new HttpClient { BaseAddress = _client.BaseAddress };
+        // Crea un client senza header X-Api-Token per verificare che AllowAnonymous sia attivo
+        using var anonymousClient = _factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/SecurityService.svc/GetToken", new
+        var response = await anonymousClient.PostAsJsonAsync("/SecurityService.svc/GetToken", new
         {
             username = "utente_ok",
             password = "password_ok"
         });
 
-        // Deve rispondere 200 — AllowAnonymous, nessun filtro token
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
