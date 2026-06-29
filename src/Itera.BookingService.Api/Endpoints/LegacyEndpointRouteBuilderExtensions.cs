@@ -12,11 +12,9 @@ public static class LegacyEndpointRouteBuilderExtensions
     public static IEndpointRouteBuilder MapLegacyServiceEndpoints(this IEndpointRouteBuilder app)
     {
         MapBranchEndpoints(app);
-        //MapClientEndpoints(app);
         MapEstimateEndpoints(app);
         MapSecurityEndpoints(app);
         MapVehicleEndpoints(app);
-        //MapMultaEndpoints(app);
 
         return app;
     }
@@ -80,30 +78,6 @@ public static class LegacyEndpointRouteBuilderExtensions
         .RequireLegacyToken();
     }
 
-    private static void MapClientEndpoints(IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/ClientService.svc").WithTags("ClientService");
-
-        MapJsonEndpoint(group, "ClientService", "GetClientInfo", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetTypeLicense", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetTypeClient", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "Login", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "Logout", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetDriverClient", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "AddDriver", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetAccountListRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "AddAccountRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "UpdateAccountRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetRoleAccountRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetStateAccountRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetAccountDetailRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "IsAccountRental360LoggedIn", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "DeleteAccountRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "ChangePasswordAccountRental360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "ForceNewPasswordAccountRentalSoftware360", requiresToken: true);
-        MapJsonEndpoint(group, "ClientService", "GetPasswordParameters", requiresToken: true);
-    }
-
     private static void MapEstimateEndpoints(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/EstimateService.svc").WithTags("EstimateService");
@@ -138,14 +112,6 @@ public static class LegacyEndpointRouteBuilderExtensions
         MapJsonEndpoint(group, "VehicleService", "GetVehicle", requiresToken: true);
     }
 
-    private static void MapMultaEndpoints(IEndpointRouteBuilder app)
-    {
-        var group = app.MapGroup("/MultaService.svc").WithTags("MultaService");
-
-        MapXmlEndpoint(group, "MultaService", "NotificaLavorato");
-        MapXmlEndpoint(group, "MultaService", "ConfermaLavorato");
-    }
-
     private static void MapJsonEndpoint(RouteGroupBuilder group, string serviceName, string endpointName, bool requiresToken)
     {
         var endpoint = group.MapPost($"/{endpointName}", async (
@@ -161,19 +127,5 @@ public static class LegacyEndpointRouteBuilderExtensions
         {
             endpoint.RequireLegacyToken();
         }
-    }
-
-    private static void MapXmlEndpoint(RouteGroupBuilder group, string serviceName, string endpointName)
-    {
-        group.MapPost($"/{endpointName}", async (
-            HttpRequest request,
-            ILegacyEndpointExecutor executor,
-            CancellationToken cancellationToken) =>
-        {
-            using var reader = new StreamReader(request.Body, Encoding.UTF8);
-            var payload = await reader.ReadToEndAsync(cancellationToken);
-            var responseXml = await executor.ExecuteXmlAsync(serviceName, endpointName, payload, cancellationToken);
-            return Results.Content(responseXml, "application/xml", Encoding.UTF8);
-        }).WithName($"{serviceName}_{endpointName}");
     }
 }

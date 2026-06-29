@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Xml.Linq;
 using Xunit;
 
 namespace Itera.BookingService.Api.Tests.Integration;
@@ -160,49 +159,10 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
         Assert.Equal("Milan Central", data[0].GetProperty("description").GetString());
     }
 
-    [Theory]
-    [MemberData(nameof(XmlEndpoints))]
-    public async Task Legacy_Xml_Endpoints_Return_Strict_Contract_Snapshot(string serviceName, string endpointName)
-    {
-        var path = $"/{serviceName}.svc/{endpointName}";
-        using var content = new StringContent("<request />", Encoding.UTF8, "application/xml");
-        var response = await _client.PostAsync(path, content);
-
-        response.EnsureSuccessStatusCode();
-        Assert.Equal("application/xml", response.Content.Headers.ContentType?.MediaType);
-
-        var xml = await response.Content.ReadAsStringAsync();
-        var document = XDocument.Parse(xml);
-
-        Assert.Equal("WsMultaStatoRisposta", document.Root?.Name.LocalName);
-        Assert.Equal("false", document.Root?.Element("Esito")?.Value);
-        Assert.Equal("NOT_IMPLEMENTED", document.Root?.Element("CodiceErrore")?.Value);
-        Assert.Equal($"Endpoint '{serviceName}/{endpointName}' non ancora migrato.", document.Root?.Element("Messaggio")?.Value);
-    }
-
     public static IEnumerable<object[]> JsonEndpoints()
     {
         return
         [
-            ["ClientService", "GetClientInfo"],
-            ["ClientService", "GetTypeLicense"],
-            ["ClientService", "GetTypeClient"],
-            ["ClientService", "Login"],
-            ["ClientService", "Logout"],
-            ["ClientService", "GetDriverClient"],
-            ["ClientService", "AddDriver"],
-            ["ClientService", "GetAccountListRentalSoftware360"],
-            ["ClientService", "AddAccountRentalSoftware360"],
-            ["ClientService", "UpdateAccountRentalSoftware360"],
-            ["ClientService", "GetRoleAccountRentalSoftware360"],
-            ["ClientService", "GetStateAccountRentalSoftware360"],
-            ["ClientService", "GetAccountDetailRentalSoftware360"],
-            ["ClientService", "IsAccountRental360LoggedIn"],
-            ["ClientService", "DeleteAccountRentalSoftware360"],
-            ["ClientService", "ChangePasswordAccountRental360"],
-            ["ClientService", "ForceNewPasswordAccountRentalSoftware360"],
-            ["ClientService", "GetPasswordParameters"],
-
             ["EstimateService", "GetAllCategory"],
             ["EstimateService", "GetKms"],
             ["EstimateService", "GetEstimate"],
@@ -222,15 +182,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
             ["SecurityService", "ResetKeyCache"],
 
             ["VehicleService", "GetVehicle"]
-        ];
-    }
-
-    public static IEnumerable<object[]> XmlEndpoints()
-    {
-        return
-        [
-            ["MultaService", "NotificaLavorato"],
-            ["MultaService", "ConfermaLavorato"]
         ];
     }
 }
