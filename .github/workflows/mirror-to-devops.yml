@@ -19,9 +19,11 @@ jobs:
           fetch-depth: 0
 
       - name: Push mirror to Azure DevOps
+        shell: bash
         env:
           DEVOPS_PAT: ${{ secrets.DEVOPS_PAT }}
           DEVOPS_URL: ${{ secrets.DEVOPS_REPO_URL }}
         run: |
-          git remote add devops "https://token:${DEVOPS_PAT}@${DEVOPS_URL#https://}"
+          AUTHENTICATED_URL="https://token:${DEVOPS_PAT}@${DEVOPS_URL#https://}"
+          git remote add devops "$AUTHENTICATED_URL"
           git push devops --mirror
