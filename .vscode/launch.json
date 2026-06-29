@@ -1,15 +1,57 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C#: Itera.BookingService Debug",
+            "name": "C#: Itera.BookingService (http)",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.csproj"
+            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.csproj",
+            "launchBrowser": {
+                "enabled": true,
+                "args": "http://localhost:5209/swagger",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start http://localhost:5209/swagger"
+                },
+                "osx": {
+                    "command": "open",
+                    "args": "http://localhost:5209/swagger"
+                },
+                "linux": {
+                    "command": "xdg-open",
+                    "args": "http://localhost:5209/swagger"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5209"
+            }
+        },
+        {
+            "name": "C#: Itera.BookingService (https)",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/src/Itera.BookingService.Api/Itera.BookingService.csproj",
+            "launchBrowser": {
+                "enabled": true,
+                "args": "https://localhost:7048/swagger",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start https://localhost:7048/swagger"
+                },
+                "osx": {
+                    "command": "open",
+                    "args": "https://localhost:7048/swagger"
+                },
+                "linux": {
+                    "command": "xdg-open",
+                    "args": "https://localhost:7048/swagger"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7048;http://localhost:5209"
+            }
         }
-
     ]
 }
