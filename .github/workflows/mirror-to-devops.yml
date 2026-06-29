@@ -1,0 +1,27 @@
+name: Mirror to Azure DevOps
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+
+jobs:
+  mirror:
+    name: Mirror to Azure DevOps
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push mirror to Azure DevOps
+        env:
+          DEVOPS_PAT: ${{ secrets.DEVOPS_PAT }}
+          DEVOPS_URL: ${{ secrets.DEVOPS_REPO_URL }}
+        run: |
+          git remote add devops "https://token:${DEVOPS_PAT}@${DEVOPS_URL#https://}"
+          git push devops --mirror
