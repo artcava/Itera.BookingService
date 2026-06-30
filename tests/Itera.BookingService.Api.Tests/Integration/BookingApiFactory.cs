@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Itera.BookingService.Api.Tests.Integration;
 
-public sealed class BookingApiFactory : WebApplicationFactory<Program>
+public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 {
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
@@ -195,7 +195,6 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 
 	private sealed class FakeVehicleQueryService : IVehicleQueryService
 	{
-		// Seed fisso: 2 modelli con FleetID diversi per testare il filtro CSV
 		private static readonly List<WsMezzoSegmento> AllMezzi =
 		[
 			new()

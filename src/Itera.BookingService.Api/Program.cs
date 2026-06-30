@@ -83,5 +83,3 @@ app.MapLegacyServiceEndpoints();
 app.MapOpenApi();
 
 app.Run();
-
-public partial class Program;
