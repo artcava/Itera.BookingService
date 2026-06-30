@@ -42,7 +42,7 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     }
 
     // -------------------------------------------------------------------------
-    // Stub endpoints (NOT_IMPLEMENTED) — solo Estimate
+    // Stub endpoints (NOT_IMPLEMENTED) — solo Estimate (non ancora migrati)
     // -------------------------------------------------------------------------
 
     [Theory]
@@ -70,7 +70,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     {
         return
         [
-            ["EstimateService", "GetAllCategory"],
             ["EstimateService", "GetKms"],
             ["EstimateService", "GetEstimate"],
             ["EstimateService", "EstimateConfirmation"],
@@ -84,7 +83,50 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
             ["EstimateService", "GetAmountEstimate"],
             ["EstimateService", "GetWholeEstimate"]
             // VehicleService/GetVehicle rimosso: endpoint ora implementato
+            // EstimateService/GetAllCategory rimosso: endpoint ora implementato
         ];
+    }
+
+    // -------------------------------------------------------------------------
+    // Estimate
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task GetAllCategory_Returns_Categories_For_Default_Brand()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAllCategory", new
+        {
+            language = "ita"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal(JsonValueKind.Array, data.ValueKind);
+        Assert.Equal(4, data.GetArrayLength());
+        Assert.Equal("A", data[0].GetProperty("categoryID").GetString());
+        Assert.Equal("Auto", data[0].GetProperty("description").GetString());
+    }
+
+    [Fact]
+    public async Task GetAllCategory_English_Returns_Translated_Descriptions()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAllCategory", new
+        {
+            language = "en"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal("Car", data[0].GetProperty("description").GetString());
+        Assert.Equal("Van", data[1].GetProperty("description").GetString());
     }
 
     // -------------------------------------------------------------------------
@@ -280,7 +322,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     [Fact]
     public async Task GetVehicle_Response_Shape_Is_WsResponse_Contract()
     {
-        // Verifica che la struttura JSON sia esattamente { esito, codiceErrore, messaggio, data }
         var response = await _client.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new { });
 
         response.EnsureSuccessStatusCode();
@@ -326,7 +367,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     [Fact]
     public async Task GetVehicle_Invalid_GruppoID_Returns_ValidationError()
     {
-        // GruppoID = 0 fallisce la validazione (deve essere > 0)
         var response = await _client.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new
         {
             gruppoID = 0
@@ -344,7 +384,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     public async Task GetVehicle_Without_Token_Returns_Esito_False()
     {
         using var anonymousClient = _factory.CreateClient();
-        // nessun header X-Api-Token
 
         var response = await anonymousClient.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new { });
 
