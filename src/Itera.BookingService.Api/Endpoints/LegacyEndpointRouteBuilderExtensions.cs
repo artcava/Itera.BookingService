@@ -1,8 +1,8 @@
-using System.Text;
 using System.Text.Json;
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Legacy.Vehicle;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Itera.BookingService.Api.Endpoints;
@@ -32,10 +32,10 @@ public static class LegacyEndpointRouteBuilderExtensions
             if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)
                 || authContextRaw is not LegacyAuthContext authContext)
             {
-                return Results.Json(new Contracts.Legacy.WsResponse<object?>
+                return Results.Json(new WsResponse<object?>
                 {
                     Esito = false,
-                    CodiceErrore = Contracts.Legacy.LegacyErrorCodes.InvalidToken.ToString(),
+                    CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
                     Messaggio = "Invalid token",
                     Data = null
                 });
@@ -59,10 +59,10 @@ public static class LegacyEndpointRouteBuilderExtensions
             if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)
                 || authContextRaw is not LegacyAuthContext authContext)
             {
-                return Results.Json(new Contracts.Legacy.WsResponse<object?>
+                return Results.Json(new WsResponse<object?>
                 {
                     Esito = false,
-                    CodiceErrore = Contracts.Legacy.LegacyErrorCodes.InvalidToken.ToString(),
+                    CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
                     Messaggio = "Invalid token",
                     Data = null
                 });
@@ -82,25 +82,51 @@ public static class LegacyEndpointRouteBuilderExtensions
     {
         var group = app.MapGroup("/EstimateService.svc").WithTags("EstimateService");
 
-        MapJsonEndpoint(group, "EstimateService", "GetAllCategory", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetKms", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetEstimate", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "EstimateConfirmation", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetDefaultValues", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetProvince", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetAccessoryBooking", requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetAllCategory",                   requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetKms",                           requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetEstimate",                      requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "EstimateConfirmation",             requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetDefaultValues",                requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetProvince",                     requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetAccessoryBooking",             requiresToken: true);
         MapJsonEndpoint(group, "EstimateService", "GetAccessoryBookingFromEstimate", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetNation", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetInsuranceExtra", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetInsuranceExtraFromEstimate", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetAmountEstimate", requiresToken: true);
-        MapJsonEndpoint(group, "EstimateService", "GetWholeEstimate", requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetNation",                       requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetInsuranceExtra",               requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetInsuranceExtraFromEstimate",   requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetAmountEstimate",               requiresToken: true);
+        MapJsonEndpoint(group, "EstimateService", "GetWholeEstimate",                requiresToken: true);
     }
 
     private static void MapVehicleEndpoints(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/VehicleService.svc").WithTags("VehicleService");
-        MapJsonEndpoint(group, "VehicleService", "GetVehicle", requiresToken: true);
+
+        group.MapPost("/GetVehicle", async (
+            [FromBody] WsGetMezziRequest request,
+            HttpContext httpContext,
+            ILegacyVehicleService vehicleService,
+            CancellationToken cancellationToken) =>
+        {
+            if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)
+                || authContextRaw is not LegacyAuthContext authContext)
+            {
+                return Results.Json(new WsResponse<object?>
+                {
+                    Esito = false,
+                    CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+                    Messaggio = "Invalid token",
+                    Data = null
+                });
+            }
+
+            var response = await vehicleService.GetVehicleAsync(request, authContext, cancellationToken);
+            return Results.Json(response);
+        })
+        .WithName("VehicleService_GetVehicle")
+        .WithSummary("Get vehicles by segment")
+        .WithDescription("Legacy-compatible GetVehicle endpoint. Supports optional filters: FleetMulti (CSV), SegmentoMulti (CSV), MezzoSpeciale, GruppoID.")
+        .Produces<WsResponse<List<WsMezzoSegmento>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
     }
 
     private static void MapJsonEndpoint(RouteGroupBuilder group, string serviceName, string endpointName, bool requiresToken)
@@ -115,8 +141,6 @@ public static class LegacyEndpointRouteBuilderExtensions
         }).WithName($"{serviceName}_{endpointName}");
 
         if (requiresToken)
-        {
             endpoint.RequireLegacyToken();
-        }
     }
 }
