@@ -1,3 +1,4 @@
+using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,15 +16,6 @@ public class GetFilialeInfoWs2ResultConfiguration : IEntityTypeConfiguration<Get
 public class GetFilialiFatturazioneClienteWsResultConfiguration : IEntityTypeConfiguration<GetFilialiFatturazioneClienteWsResult>
 {
     public void Configure(EntityTypeBuilder<GetFilialiFatturazioneClienteWsResult> builder)
-    {
-        builder.HasNoKey();
-        builder.ToView(null);
-    }
-}
-
-public class GetMezziWsResultConfiguration : IEntityTypeConfiguration<GetMezziWsResult>
-{
-    public void Configure(EntityTypeBuilder<GetMezziWsResult> builder)
     {
         builder.HasNoKey();
         builder.ToView(null);

@@ -6,6 +6,7 @@ using Itera.BookingService.Infrastructure.Branch;
 using Itera.BookingService.Infrastructure.Execution;
 using Itera.BookingService.Infrastructure.Persistence;
 using Itera.BookingService.Infrastructure.Security;
+using Itera.BookingService.Infrastructure.Vehicle;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +54,9 @@ public static class InfrastructureServiceCollectionExtensions
 
         // Security
         services.AddScoped<ISecurityQueryService, SecurityQueryService>();
+
+        // Vehicle
+        services.AddScoped<IVehicleQueryService, LegacyVehicleQueryService>();
 
         return services;
     }

@@ -3,6 +3,7 @@ using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Legacy.Vehicle;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Itera.BookingService.Api.Tests.Integration;
 
-public sealed class BookingApiFactory : WebApplicationFactory<Program>
+public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 {
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
@@ -19,12 +20,18 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 			services.RemoveAll<ITokenValidationService>();
 			services.RemoveAll<IBranchInfoQueryService>();
 			services.RemoveAll<ISecurityService>();
+			services.RemoveAll<IVehicleQueryService>();
 
 			services.AddSingleton<ITokenValidationService, FakeTokenValidationService>();
 			services.AddSingleton<IBranchInfoQueryService, FakeBranchInfoQueryService>();
 			services.AddSingleton<ISecurityService, FakeSecurityService>();
+			services.AddSingleton<IVehicleQueryService, FakeVehicleQueryService>();
 		});
 	}
+
+	// ------------------------------------------------------------------
+	// Fakes
+	// ------------------------------------------------------------------
 
 	private sealed class FakeTokenValidationService : ITokenValidationService
 	{
@@ -183,6 +190,55 @@ public sealed class BookingApiFactory : WebApplicationFactory<Program>
 					Telephone = "020000000"
 				}
 			});
+		}
+	}
+
+	private sealed class FakeVehicleQueryService : IVehicleQueryService
+	{
+		private static readonly List<WsMezzoSegmento> AllMezzi =
+		[
+			new()
+			{
+				ModelloMezzoID          = 1,
+				Marca                   = "Fiat",
+				ModelloDescr            = "Panda",
+				CodiceSegmento          = "ECO",
+				SegmentoDescrizione     = "Economy",
+				AlimentazioneModelloID  = 1,
+				AlimentazioneDescr      = "Benzina",
+				SegmentoModelloClasseID = 1,
+				SegmentoModelloClasseIDDescrizione = "Utilitaria"
+			},
+			new()
+			{
+				ModelloMezzoID          = 2,
+				Marca                   = "Volkswagen",
+				ModelloDescr            = "Golf",
+				CodiceSegmento          = "MID",
+				SegmentoDescrizione     = "Intermediate",
+				AlimentazioneModelloID  = 2,
+				AlimentazioneDescr      = "Diesel",
+				SegmentoModelloClasseID = 2,
+				SegmentoModelloClasseIDDescrizione = "Berlina"
+			}
+		];
+
+		public Task<List<WsMezzoSegmento>> GetMezziAsync(
+			string? fleetMulti,
+			string? segmentoMulti,
+			bool? mezzoSpeciale,
+			int? gruppoId,
+			CancellationToken cancellationToken)
+		{
+			var result = AllMezzi.ToList();
+
+			if (!string.IsNullOrWhiteSpace(segmentoMulti))
+			{
+				var segmenti = segmentoMulti.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+				result = result.Where(m => segmenti.Contains(m.CodiceSegmento, StringComparer.OrdinalIgnoreCase)).ToList();
+			}
+
+			return Task.FromResult(result);
 		}
 	}
 }
