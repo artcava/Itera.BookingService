@@ -1,6 +1,1 @@
-namespace Itera.BookingService.Infrastructure.Persistence.Entities;
-
-public class Km
-{
-    public int KmID { get; set; }
-}
+// Moved to Entities/Estimate/Km.cs

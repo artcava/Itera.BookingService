@@ -1,6 +1,1 @@
-namespace Itera.BookingService.Infrastructure.Persistence.Entities;
-
-public class TipologiaFranchigia
-{
-    public int TipologiaFranchigiaID { get; set; }
-}
+// Moved to Entities/Estimate/TipologiaFranchigia.cs
