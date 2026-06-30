@@ -79,9 +79,6 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapHealthChecks("/health");
 
-// Security endpoints registrati prima degli stub legacy: hanno logica reale e non devono
-// essere intercettati dal LegacyEndpointExecutor placeholder.
-app.MapSecurityEndpoints();
 app.MapLegacyServiceEndpoints();
 app.MapOpenApi();
 

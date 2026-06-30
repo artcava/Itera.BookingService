@@ -5,10 +5,10 @@ public static class LegacyEndpointRouteBuilderExtensions
     public static IEndpointRouteBuilder MapLegacyServiceEndpoints(
         this IEndpointRouteBuilder app)
     {
+        app.MapSecurityEndpoints();
         app.MapBranchEndpoints();
         app.MapEstimateEndpoints();
         app.MapVehicleEndpoints();
-        // Security endpoints registrati separatamente in Program.cs via MapSecurityEndpoints()
 
         return app;
     }
