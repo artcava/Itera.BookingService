@@ -42,7 +42,7 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     }
 
     // -------------------------------------------------------------------------
-    // Stub endpoints (NOT_IMPLEMENTED) — Estimate + Vehicle
+    // Stub endpoints (NOT_IMPLEMENTED) — solo Estimate
     // -------------------------------------------------------------------------
 
     [Theory]
@@ -82,9 +82,8 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
             ["EstimateService", "GetInsuranceExtra"],
             ["EstimateService", "GetInsuranceExtraFromEstimate"],
             ["EstimateService", "GetAmountEstimate"],
-            ["EstimateService", "GetWholeEstimate"],
-
-            ["VehicleService", "GetVehicle"]
+            ["EstimateService", "GetWholeEstimate"]
+            // VehicleService/GetVehicle rimosso: endpoint ora implementato
         ];
     }
 
@@ -157,7 +156,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     [Fact]
     public async Task Security_Endpoints_Are_Accessible_Without_Token_Header()
     {
-        // Crea un client senza header X-Api-Token per verificare che AllowAnonymous sia attivo
         using var anonymousClient = _factory.CreateClient();
 
         var response = await anonymousClient.PostAsJsonAsync("/SecurityService.svc/GetToken", new
@@ -273,5 +271,86 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
         var data = payload.GetProperty("data");
         Assert.Equal(1, data.GetArrayLength());
         Assert.Equal("Milan Central", data[0].GetProperty("description").GetString());
+    }
+
+    // -------------------------------------------------------------------------
+    // Vehicle
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task GetVehicle_Response_Shape_Is_WsResponse_Contract()
+    {
+        // Verifica che la struttura JSON sia esattamente { esito, codiceErrore, messaggio, data }
+        var response = await _client.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new { });
+
+        response.EnsureSuccessStatusCode();
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var propertyNames = payload.EnumerateObject().Select(x => x.Name).OrderBy(x => x).ToArray();
+        Assert.Equal(["codiceErrore", "data", "esito", "messaggio"], propertyNames);
+    }
+
+    [Fact]
+    public async Task GetVehicle_NoFilters_Returns_Esito_True_With_Array()
+    {
+        var response = await _client.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new { });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+        Assert.Equal(JsonValueKind.Array, payload.GetProperty("data").ValueKind);
+        Assert.Equal(2, payload.GetProperty("data").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task GetVehicle_SegmentoMulti_Filters_Result()
+    {
+        var response = await _client.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new
+        {
+            segmentoMulti = "ECO"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal(1, data.GetArrayLength());
+        Assert.Equal("ECO", data[0].GetProperty("codiceSegmento").GetString());
+        Assert.Equal("Fiat", data[0].GetProperty("marca").GetString());
+    }
+
+    [Fact]
+    public async Task GetVehicle_Invalid_GruppoID_Returns_ValidationError()
+    {
+        // GruppoID = 0 fallisce la validazione (deve essere > 0)
+        var response = await _client.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new
+        {
+            gruppoID = 0
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.False(payload.GetProperty("esito").GetBoolean());
+        Assert.Equal("VALIDATION_ERROR", payload.GetProperty("codiceErrore").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(payload.GetProperty("messaggio").GetString()));
+    }
+
+    [Fact]
+    public async Task GetVehicle_Without_Token_Returns_Esito_False()
+    {
+        using var anonymousClient = _factory.CreateClient();
+        // nessun header X-Api-Token
+
+        var response = await anonymousClient.PostAsJsonAsync("/VehicleService.svc/GetVehicle", new { });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.False(payload.GetProperty("esito").GetBoolean());
     }
 }
