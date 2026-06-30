@@ -1,47 +1,43 @@
-using System.Text.Json;
 using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.Legacy.Estimate;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Itera.BookingService.Api.Endpoints;
 
 public static class EstimateEndpoints
 {
-    private static readonly IReadOnlyList<string> _methods =
-    [
-        "GetAllCategory",
-        "GetKms",
-        "GetEstimate",
-        "EstimateConfirmation",
-        "GetDefaultValues",
-        "GetProvince",
-        "GetAccessoryBooking",
-        "GetAccessoryBookingFromEstimate",
-        "GetNation",
-        "GetInsuranceExtra",
-        "GetInsuranceExtraFromEstimate",
-        "GetAmountEstimate",
-        "GetWholeEstimate"
-    ];
-
     public static IEndpointRouteBuilder MapEstimateEndpoints(
         this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/EstimateService.svc").WithTags("EstimateService");
 
-        foreach (var method in _methods)
+        group.MapPost("/GetAllCategory", async (
+            [FromBody] WsGetAllCategorieRequest request,
+            HttpContext httpContext,
+            ILegacyEstimateService estimateService,
+            CancellationToken cancellationToken) =>
         {
-            var capturedMethod = method;
-            group.MapPost($"/{capturedMethod}", async (
-                [FromBody] JsonElement payload,
-                ILegacyEndpointExecutor executor,
-                CancellationToken cancellationToken) =>
+            if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)
+                || authContextRaw is not LegacyAuthContext authContext)
             {
-                var response = await executor.ExecuteJsonAsync("EstimateService", capturedMethod, payload, cancellationToken);
-                return Results.Json(response);
-            })
-            .WithName($"EstimateService_{capturedMethod}")
-            .RequireLegacyToken();
-        }
+                return Results.Json(new WsResponse<object?>
+                {
+                    Esito        = false,
+                    CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+                    Messaggio    = "Invalid token",
+                    Data         = null
+                });
+            }
+
+            var response = await estimateService.GetAllCategoryAsync(request, authContext, cancellationToken);
+            return Results.Json(response);
+        })
+        .WithName("EstimateService_GetAllCategory")
+        .WithSummary("Get all vehicle categories")
+        .WithDescription("Restituisce le categorie di veicolo disponibili localizzate per lingua e filtrate per brand. Logica puramente in-memory, porting da WsPreventivoBL.GetAllCategorie.")
+        .Produces<WsResponse<List<WsCategoria>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
 
         return app;
     }

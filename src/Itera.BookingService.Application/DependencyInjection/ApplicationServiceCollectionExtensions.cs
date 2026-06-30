@@ -1,6 +1,7 @@
 using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Branch;
+using Itera.BookingService.Application.Estimate;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Application.Security.Validators;
@@ -26,6 +27,10 @@ public static class ApplicationServiceCollectionExtensions
         // Vehicle
         services.AddScoped<IValidator<Contracts.Legacy.Vehicle.WsGetMezziRequest>, WsGetMezziRequestValidator>();
         services.AddScoped<ILegacyVehicleService, LegacyVehicleService>();
+
+        // Estimate
+        services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetAllCategorieRequest>, WsGetAllCategorieRequestValidator>();
+        services.AddScoped<ILegacyEstimateService, LegacyEstimateService>();
 
         return services;
     }
