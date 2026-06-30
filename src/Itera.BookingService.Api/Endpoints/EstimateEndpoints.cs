@@ -18,17 +18,7 @@ public static class EstimateEndpoints
             ILegacyEstimateService estimateService,
             CancellationToken cancellationToken) =>
         {
-            if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)
-                || authContextRaw is not LegacyAuthContext authContext)
-            {
-                return Results.Json(new WsResponse<object?>
-                {
-                    Esito        = false,
-                    CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
-                    Messaggio    = "Invalid token",
-                    Data         = null
-                });
-            }
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
 
             var response = await estimateService.GetAllCategoryAsync(request, authContext, cancellationToken);
             return Results.Json(response);
