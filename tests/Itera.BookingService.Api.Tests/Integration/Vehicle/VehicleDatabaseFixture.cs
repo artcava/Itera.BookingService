@@ -71,11 +71,12 @@ public sealed class VehicleDatabaseFixture : IAsyncLifetime
     // ------------------------------------------------------------------
     // Schema DDL + seed SQL
     // Tabelle nella stessa sequenza dei FK per evitare violazioni.
-    // IDENTITY inserita via SET IDENTITY_INSERT dove necessario.
+    // SegmentoModelloClasse usa PK INT senza IDENTITY: i valori vengono
+    // inseriti direttamente senza SET IDENTITY_INSERT.
     // ------------------------------------------------------------------
 
     private const string SchemaAndSeedSql = """
-        -- SegmentoModelloClasse
+        -- SegmentoModelloClasse: PK senza IDENTITY, INSERT diretto con valori espliciti
         CREATE TABLE [dbo].[SegmentoModelloClasse] (
             [SegmentoModelloClasseID] INT          NOT NULL,
             [Descrizione]            VARCHAR(50)  NULL,
@@ -191,25 +192,24 @@ public sealed class VehicleDatabaseFixture : IAsyncLifetime
         -- SEED
         -- ================================================================
 
-        -- lookup tables
-        SET IDENTITY_INSERT [dbo].[SegmentoModelloClasse] ON;
+        -- SegmentoModelloClasse: INSERT diretto (nessuna IDENTITY sulla tabella)
         INSERT INTO [dbo].[SegmentoModelloClasse] ([SegmentoModelloClasseID],[Descrizione])
         VALUES (1,'Utilitaria'),(2,'Berlina');
-        SET IDENTITY_INSERT [dbo].[SegmentoModelloClasse] OFF;
 
         INSERT INTO [dbo].[AlimentazioneModello] ([Descrizione]) VALUES ('Benzina'),('Diesel');
         INSERT INTO [dbo].[Marca] ([Descrizione]) VALUES ('Fiat'),('Volkswagen');
 
         -- ECO: FleetID='A', Ordinamento=20, SegmentoModelloClasseID=1
+        -- MID: FleetID='B', Ordinamento=10, SegmentoModelloClasseID=2
         INSERT INTO [dbo].[SegmentoModello]
             ([CodiceSegmento],[CodiceCategoria],[Descrizione],[Ordinamento],[FleetID],[SegmentoModelloClasseID])
         VALUES
             ('ECO','','Economy',20,'A',1),
             ('MID','','Intermediate',10,'B',2);
 
-        -- ModelloMezzo: 2 righe, IDENTITY parte da 1
+        -- ModelloMezzo: IDENTITY parte da 1
         -- ModelloMezzoID=1 -> ECO (MarcaID=1/Fiat, Alim=1/Benzina)
-        -- ModelloMezzoID=2 -> MID (MarcaID=2/VW,  Alim=2/Diesel) VisibilitaSito=1
+        -- ModelloMezzoID=2 -> MID (MarcaID=2/VW,  Alim=2/Diesel)
         INSERT INTO [dbo].[ModelloMezzo]
             ([CodiceSegmento],[MarcaID],[AlimentazioneModelloID],[Descrizione],[VisibilitaSito],[DataModifica])
         VALUES
