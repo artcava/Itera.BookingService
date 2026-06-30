@@ -1,12 +1,35 @@
-namespace Itera.BookingService.Infrastructure.Persistence.Entities;
+using Microsoft.EntityFrameworkCore;
 
-public class ListinoKm
+namespace Itera.BookingService.Infrastructure.Persistence.Entities.Estimate;
+
+/// <summary>
+/// Rappresenta la tabella ListinoKm del DB legacy.
+/// Contiene le opzioni km associate a un listino/categoria.
+/// </summary>
+[Index(nameof(ListinoId), nameof(CategoriaId))]
+public sealed class ListinoKm
 {
-    public int ListinoKmID { get; set; }
-    public int ListinoGiorniID { get; set; }
-    public int Km { get; set; }
-    public short Ordinamento { get; set; }
-    public bool? IsVisible { get; set; }
+    /// <summary>PK — KmID (es. "100", "200", "UNLI").</summary>
+    public string KmId { get; set; } = default!;
 
-    public ListinoGiorni ListinoGiorni { get; set; } = null!;
+    /// <summary>Descrizione dell'opzione km.</summary>
+    public string? Descrizione { get; set; }
+
+    /// <summary>FK verso il listino di riferimento.</summary>
+    public int ListinoId { get; set; }
+
+    /// <summary>Codice categoria veicolo (es. "ECO").</summary>
+    public string? CategoriaId { get; set; }
+
+    /// <summary>Fascia oraria di ritiro associata a questa opzione.</summary>
+    public int? FasciaOrarioRitiro { get; set; }
+
+    /// <summary>Fascia oraria di consegna associata a questa opzione.</summary>
+    public int? FasciaOrarioConsegna { get; set; }
+
+    /// <summary>Indica se questa opzione è quella di default per il listino.</summary>
+    public bool Selected { get; set; }
+
+    /// <summary>FK verso la filiale.</summary>
+    public int FilialeId { get; set; }
 }

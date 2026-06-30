@@ -1,5 +1,4 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Infrastructure.Auth;
@@ -24,8 +23,8 @@ public static class InfrastructureServiceCollectionExtensions
         var optionsSection = configuration.GetSection(LegacyInfrastructureOptions.SectionName);
         var options = new LegacyInfrastructureOptions
         {
-            EnableDetailedErrors = bool.TryParse(optionsSection["EnableDetailedErrors"], out var detailed) && detailed,
-            CommandTimeoutSeconds = int.TryParse(optionsSection["CommandTimeoutSeconds"], out var timeout) ? timeout : 30
+            EnableDetailedErrors  = bool.TryParse(optionsSection["EnableDetailedErrors"],  out var detailed) && detailed,
+            CommandTimeoutSeconds = int.TryParse(optionsSection["CommandTimeoutSeconds"], out var timeout)  ? timeout : 30
         };
 
         var connectionString = configuration.GetConnectionString("LegacyMain")
@@ -61,8 +60,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IVehicleQueryService, LegacyVehicleQueryService>();
 
         // Estimate
-        services.AddScoped<IDurationService, DurationService>();
-        services.AddScoped<IKmQueryService, KmQueryService>();
+        services.AddScoped<IKmQueryService, LegacyKmQueryService>();
 
         return services;
     }
