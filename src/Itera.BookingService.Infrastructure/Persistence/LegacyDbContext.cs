@@ -31,6 +31,12 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     // Vehicle
     public DbSet<Mezzo> Mezzi => Set<Mezzo>();
     public DbSet<SegmentoModello> SegmentiModello => Set<SegmentoModello>();
+    public DbSet<ModelloMezzo> ModelliMezzo => Set<ModelloMezzo>();
+    public DbSet<AlimentazioneModello> AlimentazioniModello => Set<AlimentazioneModello>();
+    public DbSet<Marca> Marche => Set<Marca>();
+    public DbSet<SegmentoModelloClasse> SegmentiModelloClasse => Set<SegmentoModelloClasse>();
+    public DbSet<SegmentoModelloMezzoSpeciale> SegmentiMezzoSpeciali => Set<SegmentoModelloMezzoSpeciale>();
+    public DbSet<ModelloMezzoGruppo> ModelliMezzoGruppo => Set<ModelloMezzoGruppo>();
 
     // Estimate
     public DbSet<Preventivo> Preventivi => Set<Preventivo>();
@@ -49,7 +55,6 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     // Correlated query/SP/view types (Wave 2 keyless)
     public DbSet<GetFilialeInfoWs2Result> GetFilialeInfoWs2Results => Set<GetFilialeInfoWs2Result>();
     public DbSet<GetFilialiFatturazioneClienteWsResult> GetFilialiFatturazioneClienteWsResults => Set<GetFilialiFatturazioneClienteWsResult>();
-    public DbSet<GetMezziWsResult> GetMezziWsResults => Set<GetMezziWsResult>();
     public DbSet<GetListinoValoriResult> GetListinoValoriResults => Set<GetListinoValoriResult>();
     public DbSet<GetKmInfoMultiResult> GetKmInfoMultiResults => Set<GetKmInfoMultiResult>();
     public DbSet<VwListinoFranchigiaResult> VwListinoFranchigiaResults => Set<VwListinoFranchigiaResult>();

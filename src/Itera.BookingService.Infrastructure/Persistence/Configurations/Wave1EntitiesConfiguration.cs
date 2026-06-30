@@ -157,42 +157,6 @@ public class FilialeValConfiguration : IEntityTypeConfiguration<FilialeVal>
     }
 }
 
-// PK stringa varchar(20) — ValueGeneratedNever obbligatorio
-public class MezzoConfiguration : IEntityTypeConfiguration<Mezzo>
-{
-    public void Configure(EntityTypeBuilder<Mezzo> builder)
-    {
-        builder.ToTable("Mezzo", "dbo");
-        builder.HasKey(x => x.CodiceMezzo);
-        builder.Property(x => x.CodiceMezzo).HasMaxLength(20).ValueGeneratedNever();
-        builder.Property(x => x.Targa).HasMaxLength(100);
-        builder.Property(x => x.Telaio).HasMaxLength(100);
-        builder.Property(x => x.CodiceAutoradio).HasMaxLength(20);
-        builder.Property(x => x.KeyCode).HasMaxLength(20);
-        builder.Property(x => x.ColoreInterno).HasMaxLength(50);
-        builder.Property(x => x.ColoreEsterno).HasMaxLength(50);
-        builder.Property(x => x.CodiceMezzoFinale).HasMaxLength(100);
-        builder.Property(x => x.CodiceMezzoVisualizzato).HasMaxLength(100);
-        builder.Property(x => x.Note).HasColumnType("text");
-        builder.Property(x => x.SubCodice).HasMaxLength(100);
-    }
-}
-
-// PK stringa varchar(3) — ValueGeneratedNever obbligatorio
-public class SegmentoModelloConfiguration : IEntityTypeConfiguration<SegmentoModello>
-{
-    public void Configure(EntityTypeBuilder<SegmentoModello> builder)
-    {
-        builder.ToTable("SegmentoModello", "dbo");
-        builder.HasKey(x => x.CodiceSegmento);
-        builder.Property(x => x.CodiceSegmento).HasMaxLength(3).ValueGeneratedNever();
-        builder.Property(x => x.CodiceCategoria).HasMaxLength(5);
-        builder.Property(x => x.Descrizione).HasMaxLength(50);
-        builder.Property(x => x.FleetID).HasMaxLength(1);
-        builder.Property(x => x.ImportoVAL).HasColumnType("money");
-    }
-}
-
 public class PreventivoConfiguration : IEntityTypeConfiguration<Preventivo>
 {
     public void Configure(EntityTypeBuilder<Preventivo> builder)

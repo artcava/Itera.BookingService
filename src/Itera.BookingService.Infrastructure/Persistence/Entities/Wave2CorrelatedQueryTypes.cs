@@ -35,47 +35,6 @@ public class GetFilialiFatturazioneClienteWsResult
     public int? FilialeID { get; set; }
 }
 
-// Risultato della SP [dbo].[GetMezziWs] — campi derivati da ModelloMezzo, SegmentoModello, AlimentazioneModello, Marca
-public class GetMezziWsResult
-{
-    public int? ModelloMezzoID { get; set; }
-    public string? Marca { get; set; }
-    public string? ModelloDescr { get; set; }
-    public string? NomeImmagine { get; set; }
-    public string? Cilindrata { get; set; }
-    public int? AlimentazioneModelloID { get; set; }
-    public string? AlimentazioneDescr { get; set; }
-    public string? Euro { get; set; }
-    public short? NumeroPosti { get; set; }
-    public short? NumeroPorte { get; set; }
-    public bool? Autoradio { get; set; }
-    public bool? AriaCondizionata { get; set; }
-    public bool? Abs { get; set; }
-    public short? Airbag { get; set; }
-    public short? CapacitaSerbatoio { get; set; }
-    public int? Portata { get; set; }
-    public int? VolumeCarico { get; set; }
-    public int? AltezzaInterna { get; set; }
-    public int? LarghezzaInterna { get; set; }
-    public int? LunghezzaInterna { get; set; }
-    public string? SegmentoDescrizione { get; set; }
-    public string? CodiceSegmento { get; set; }
-    public int? ModelloMezzoIDErs { get; set; }
-    public short? IndexPricing { get; set; }
-    public int? SegmentoModelloClasseID { get; set; }
-    public string? SegmentoModelloClasseIDDescrizione { get; set; }
-    public int? AltezzaEsterna { get; set; }
-    public int? LarghezzaEsterna { get; set; }
-    public int? LunghezzaEsterna { get; set; }
-    public int? Passo { get; set; }
-    public int? LarghezzaPassaruote { get; set; }
-    public short? NumeroPostiCarrozzina { get; set; }
-    public short? NumeroPostiMobility { get; set; }
-    public bool? PedanaSollevatriceDoppioBraccio { get; set; }
-    public string? DescrizioneMobilitySitoWeb_ITA { get; set; }
-    public string? DescrizioneMobilitySitoWeb_ENG { get; set; }
-}
-
 public class GetListinoValoriResult
 {
     public int? ListinoID { get; set; }

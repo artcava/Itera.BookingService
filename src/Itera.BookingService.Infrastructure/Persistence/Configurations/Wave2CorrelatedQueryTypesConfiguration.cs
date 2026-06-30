@@ -21,15 +21,6 @@ public class GetFilialiFatturazioneClienteWsResultConfiguration : IEntityTypeCon
     }
 }
 
-public class GetMezziWsResultConfiguration : IEntityTypeConfiguration<GetMezziWsResult>
-{
-    public void Configure(EntityTypeBuilder<GetMezziWsResult> builder)
-    {
-        builder.HasNoKey();
-        builder.ToView(null);
-    }
-}
-
 public class GetListinoValoriResultConfiguration : IEntityTypeConfiguration<GetListinoValoriResult>
 {
     public void Configure(EntityTypeBuilder<GetListinoValoriResult> builder)
