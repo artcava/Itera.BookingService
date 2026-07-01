@@ -10,7 +10,7 @@ public class LegacyEndpointExecutor(ILogger<LegacyEndpointExecutor> logger) : IL
     public Task<object> ExecuteJsonAsync(string serviceName, string endpointName, JsonElement payload, CancellationToken cancellationToken)
     {
         logger.LogInformation("Legacy endpoint placeholder called: {Service}.{Endpoint}", serviceName, endpointName);
-        var response = WsResponse<object?>.NotImplemented($"{serviceName}/{endpointName}");
+        var response = ApiResponse<object?>.NotImplemented($"{serviceName}/{endpointName}");
         return Task.FromResult<object>(response);
     }
 

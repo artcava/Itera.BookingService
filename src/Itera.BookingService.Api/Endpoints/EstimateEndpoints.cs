@@ -29,7 +29,7 @@ public static class EstimateEndpoints
         // --- Implementati ---
 
         group.MapPost("/GetAllCategory", async (
-            [FromBody] WsGetAllCategorieRequest request,
+            [FromBody] GetAllCategorieRequest request,
             HttpContext httpContext,
             ILegacyEstimateService estimateService,
             CancellationToken cancellationToken) =>
@@ -40,11 +40,11 @@ public static class EstimateEndpoints
         .WithName("EstimateService_GetAllCategory")
         .WithSummary("Get all vehicle categories")
         .WithDescription("Restituisce le categorie di veicolo disponibili localizzate per lingua e filtrate per brand. Logica puramente in-memory, porting da WsPreventivoBL.GetAllCategorie.")
-        .Produces<WsResponse<List<WsCategoria>>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<List<Categoria>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         group.MapPost("/GetKms", async (
-            [FromBody] WsGetKmsRequest request,
+            [FromBody] GetKmsRequest request,
             HttpContext httpContext,
             ILegacyEstimateService estimateService,
             CancellationToken cancellationToken) =>
@@ -55,11 +55,11 @@ public static class EstimateEndpoints
         .WithName("EstimateService_GetKms")
         .WithSummary("Get available km options")
         .WithDescription("Restituisce le opzioni km disponibili per filiale, categoria veicolo e finestra temporale. Gestisce PeriodoSuperioreAlMese tronando la finestra a un mese. Porting da WsPreventivoBL.GetKms.")
-        .Produces<WsResponse<List<WsKmOpzione>>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<List<KmOpzione>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         group.MapPost("/GetDefaultValues", async (
-            [FromBody] WsGetDefaultValuesRequest request,
+            [FromBody] GetDefaultValuesRequest request,
             HttpContext                          httpContext,
             ILegacyEstimateService               estimateService,
             CancellationToken                    cancellationToken) =>
@@ -75,11 +75,11 @@ public static class EstimateEndpoints
             "date di ritiro/consegna (oggi+1/oggi+2) e categoria veicolo predefinita. " +
             "Logica puramente in-memory, porting da WsPreventivoBL.GetDefaultValues. " +
             "Il ramo GetPrimoGiornoUtilePerRitiro \u00e8 disabilitato nel legacy e non portato.")
-        .Produces<WsResponse<WsGetDefaultValues>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<GetDefaultValues>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         group.MapPost("/GetProvince", async (
-            [FromBody] WsGetProvinceRequest request,
+            [FromBody] GetProvinceRequest request,
             HttpContext                     httpContext,
             ILegacyEstimateService          estimateService,
             CancellationToken               cancellationToken) =>
@@ -94,7 +94,7 @@ public static class EstimateEndpoints
             "Restituisce l'elenco delle province ordinate per denominazione. " +
             "Query diretta su tabella Province (entit\u00e0 normale EF Core, nessun keyless type). " +
             "Porting da WsPreventivoBL.GetProvince.")
-        .Produces<WsResponse<List<WsGetProvince>>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<List<GetProvince>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---
