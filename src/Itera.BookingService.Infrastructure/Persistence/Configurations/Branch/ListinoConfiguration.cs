@@ -1,4 +1,5 @@
 using Itera.BookingService.Infrastructure.Persistence.Entities;
+using Itera.BookingService.Infrastructure.Persistence.Entities.Estimate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
