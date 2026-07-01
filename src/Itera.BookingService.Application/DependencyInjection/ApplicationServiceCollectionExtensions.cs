@@ -2,6 +2,8 @@ using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Branch;
 using Itera.BookingService.Application.Estimate;
+using Itera.BookingService.Application.Estimate.Abstractions;
+using Itera.BookingService.Application.Estimate.Validators;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Application.Security.Validators;
@@ -30,6 +32,8 @@ public static class ApplicationServiceCollectionExtensions
 
         // Estimate
         services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetAllCategorieRequest>, WsGetAllCategorieRequestValidator>();
+        services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetKmsRequest>, GetKmsRequestValidator>();
+        services.AddScoped<IDurationService, DurationService>();
         services.AddScoped<ILegacyEstimateService, LegacyEstimateService>();
 
         return services;
