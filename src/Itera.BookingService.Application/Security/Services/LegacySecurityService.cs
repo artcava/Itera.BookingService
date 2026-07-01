@@ -28,14 +28,14 @@ public sealed class LegacySecurityService : ISecurityService
         _logger = logger;
     }
 
-    public async Task<ApiResponse<WsAuth>> GetTokenAsync(
+    public async Task<ApiResponse<AuthTokenData>> GetTokenAsync(
         GetTokenRequest request, CancellationToken ct = default)
     {
         var validation = await _getTokenValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
         {
             _logger.LogWarning("GetToken validazione fallita Username={Username}", request.Username);
-            return new ApiResponse<WsAuth>
+            return new ApiResponse<AuthTokenData>
             {
                 Esito = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -48,12 +48,12 @@ public sealed class LegacySecurityService : ISecurityService
         if (user is null)
         {
             _logger.LogWarning("GetToken credenziali non valide Username={Username}", request.Username);
-            return new ApiResponse<WsAuth>
+            return new ApiResponse<AuthTokenData>
             {
                 Esito = false,
                 CodiceErrore = "INVALID_LOGIN",
                 Messaggio = "Username o password non validi.",
-                Data = new WsAuth(null)
+                Data = new AuthTokenData(null)
             };
         }
 
@@ -63,19 +63,19 @@ public sealed class LegacySecurityService : ISecurityService
         if (token is null)
         {
             _logger.LogError("GetToken generazione token fallita WsUserID={WsUserID}", user.Value.WsUserID);
-            return new ApiResponse<WsAuth>
+            return new ApiResponse<AuthTokenData>
             {
                 Esito = false,
                 CodiceErrore = "TOKEN_GENERATION_ERROR",
                 Messaggio = "Impossibile generare un token nuovo.",
-                Data = new WsAuth(null)
+                Data = new AuthTokenData(null)
             };
         }
 
         _logger.LogInformation("GetToken completato WsUserID={WsUserID} BrandID={BrandID}",
             user.Value.WsUserID, user.Value.BrandID);
 
-        return ApiResponse<WsAuth>.Ok(new WsAuth(token.Value.ToString()));
+        return ApiResponse<AuthTokenData>.Ok(new AuthTokenData(token.Value.ToString()));
     }
 
     public async Task<ApiResponse<object?>> ValidateTokenAsync(

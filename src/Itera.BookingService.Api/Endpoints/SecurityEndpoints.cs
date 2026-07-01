@@ -21,7 +21,7 @@ public static class SecurityEndpoints
             })
             .WithName("Security_GetToken")
             .WithTags("Security")
-            .Produces<ApiResponse<WsAuth>>()
+            .Produces<ApiResponse<AuthTokenData>>()
             .AllowAnonymous();
 
         app.MapPost("/SecurityService.svc/ValidateToken",

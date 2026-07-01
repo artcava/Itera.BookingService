@@ -1,6 +1,6 @@
 namespace Itera.BookingService.Application.Security.Dtos;
 
-public sealed record WsUserDto(
+public sealed record UserDto(
     string UserId,
     string Username,
     string Nome,
@@ -8,5 +8,5 @@ public sealed record WsUserDto(
     string Email,
     string CodiceFiliale,
     bool Attivo,
-    IReadOnlyList<WsUserGruppoDto> Gruppi,
-    IReadOnlyList<WsUserListinoDto> Listini);
+    IReadOnlyList<UserGruppoDto> Gruppi,
+    IReadOnlyList<UserListinoDto> Listini);
