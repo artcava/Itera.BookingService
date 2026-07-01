@@ -73,20 +73,20 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 	{
 		private static readonly Guid ValidToken = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001");
 
-		public Task<ApiResponse<WsAuth>> GetTokenAsync(GetTokenRequest request, CancellationToken ct)
+		public Task<ApiResponse<AuthTokenData>> GetTokenAsync(GetTokenRequest request, CancellationToken ct)
 		{
 			if (request.Username == "utente_ok" && request.Password == "password_ok")
 			{
-				return Task.FromResult(new ApiResponse<WsAuth>
+				return Task.FromResult(new ApiResponse<AuthTokenData>
 				{
 					Esito = true,
 					CodiceErrore = LegacyErrorCodes.Success.ToString(),
 					Messaggio = string.Empty,
-					Data = new WsAuth(ValidToken.ToString())
+					Data = new AuthTokenData(ValidToken.ToString())
 				});
 			}
 
-			return Task.FromResult(new ApiResponse<WsAuth>
+			return Task.FromResult(new ApiResponse<AuthTokenData>
 			{
 				Esito = false,
 				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
