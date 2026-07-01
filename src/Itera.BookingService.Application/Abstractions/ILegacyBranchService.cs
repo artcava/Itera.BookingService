@@ -5,6 +5,6 @@ namespace Itera.BookingService.Application.Abstractions;
 
 public interface ILegacyBranchService
 {
-    Task<WsResponse<List<WsFiliale>>> GetAllBranchesAsync(WsGetAllFilialiRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken);
-    Task<WsResponse<WsFiliale?>> GetInfoBranchAsync(WsGetFilialeInfoRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken);
+    Task<ApiResponse<List<Filiale>>> GetAllBranchesAsync(GetAllBranchesRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken);
+    Task<ApiResponse<Filiale?>> GetInfoBranchAsync(GetBranchInfoRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken);
 }

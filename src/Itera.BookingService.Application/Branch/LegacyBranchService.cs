@@ -7,17 +7,17 @@ using Microsoft.Extensions.Logging;
 namespace Itera.BookingService.Application.Branch;
 
 public sealed class LegacyBranchService(
-    IValidator<WsGetAllFilialiRequest> allBranchesValidator,
-    IValidator<WsGetFilialeInfoRequest> infoBranchValidator,
+    IValidator<GetAllBranchesRequest> allBranchesValidator,
+    IValidator<GetBranchInfoRequest> infoBranchValidator,
     IBranchInfoQueryService branchInfoQueryService,
     ILogger<LegacyBranchService> logger) : ILegacyBranchService
 {
-    public async Task<WsResponse<List<WsFiliale>>> GetAllBranchesAsync(WsGetAllFilialiRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
+    public async Task<ApiResponse<List<Filiale>>> GetAllBranchesAsync(GetAllBranchesRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
     {
         var validation = await allBranchesValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
         {
-            return new WsResponse<List<WsFiliale>>
+            return new ApiResponse<List<Filiale>>
             {
                 Esito = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -38,15 +38,15 @@ public sealed class LegacyBranchService(
             cancellationToken);
 
         logger.LogInformation("GetAllBranches resolved {Count} rows for WsUserID {WsUserID}", branches.Count, authContext.WsUserId);
-        return WsResponse<List<WsFiliale>>.Ok(branches);
+        return ApiResponse<List<Filiale>>.Ok(branches);
     }
 
-    public async Task<WsResponse<WsFiliale?>> GetInfoBranchAsync(WsGetFilialeInfoRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
+    public async Task<ApiResponse<Filiale?>> GetInfoBranchAsync(GetBranchInfoRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
     {
         var validation = await infoBranchValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
         {
-            return new WsResponse<WsFiliale?>
+            return new ApiResponse<Filiale?>
             {
                 Esito = false,
                 CodiceErrore = LegacyErrorCodes.InvalidFilialeId.ToString(),
@@ -68,7 +68,7 @@ public sealed class LegacyBranchService(
 
         if (result is null)
         {
-            return new WsResponse<WsFiliale?>
+            return new ApiResponse<Filiale?>
             {
                 Esito = false,
                 CodiceErrore = LegacyErrorCodes.FilialeNotFound.ToString(),
@@ -78,6 +78,6 @@ public sealed class LegacyBranchService(
         }
 
         logger.LogInformation("GetInfoBranch resolved for BranchID {BranchID} and WsUserID {WsUserID}", request.BranchID, authContext.WsUserId);
-        return WsResponse<WsFiliale?>.Ok(result);
+        return ApiResponse<Filiale?>.Ok(result);
     }
 }

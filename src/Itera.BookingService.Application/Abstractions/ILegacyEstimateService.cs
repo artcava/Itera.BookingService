@@ -5,23 +5,23 @@ namespace Itera.BookingService.Application.Abstractions;
 
 public interface ILegacyEstimateService
 {
-    Task<WsResponse<List<WsCategoria>>> GetAllCategoryAsync(
-        WsGetAllCategorieRequest request,
-        LegacyAuthContext        authContext,
-        CancellationToken        cancellationToken);
+    Task<ApiResponse<List<Categoria>>> GetAllCategoryAsync(
+        GetAllCategorieRequest request,
+        LegacyAuthContext      authContext,
+        CancellationToken      cancellationToken);
 
-    Task<WsResponse<List<WsKmOpzione>>> GetKmsAsync(
-        WsGetKmsRequest   request,
+    Task<ApiResponse<List<KmOpzione>>> GetKmsAsync(
+        GetKmsRequest     request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
 
-    Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
-        WsGetDefaultValuesRequest request,
-        LegacyAuthContext         authContext,
-        CancellationToken         ct);
+    Task<ApiResponse<GetDefaultValues>> GetDefaultValuesAsync(
+        GetDefaultValuesRequest request,
+        LegacyAuthContext       authContext,
+        CancellationToken       ct);
 
-    Task<WsResponse<List<WsGetProvince>>> GetProvinceAsync(
-        WsGetProvinceRequest request,
-        LegacyAuthContext    authContext,
-        CancellationToken    ct);
+    Task<ApiResponse<List<GetProvince>>> GetProvinceAsync(
+        GetProvinceRequest request,
+        LegacyAuthContext  authContext,
+        CancellationToken  ct);
 }
