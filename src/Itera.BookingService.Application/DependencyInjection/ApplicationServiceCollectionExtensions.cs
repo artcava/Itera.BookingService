@@ -3,10 +3,7 @@ using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Branch;
 using Itera.BookingService.Application.Estimate;
 using Itera.BookingService.Application.Estimate.Abstractions;
-using Itera.BookingService.Application.Estimate.Validators;
-using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
-using Itera.BookingService.Application.Security.Validators;
 using Itera.BookingService.Application.Vehicle;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,24 +13,20 @@ public static class ApplicationServiceCollectionExtensions
 {
     public static IServiceCollection AddBookingApplication(this IServiceCollection services)
     {
+        // Registra automaticamente tutti gli IValidator<T> presenti nell'assembly Application.
+        // Nessuna registrazione manuale necessaria: aggiungere il validator è sufficiente.
+        services.AddValidatorsFromAssemblyContaining<ApplicationServiceCollectionExtensions>(ServiceLifetime.Scoped);
+
         // Branch
-        services.AddScoped<IValidator<Contracts.Legacy.Branch.WsGetAllFilialiRequest>, WsGetAllFilialiRequestValidator>();
-        services.AddScoped<IValidator<Contracts.Legacy.Branch.WsGetFilialeInfoRequest>, WsGetFilialeInfoRequestValidator>();
         services.AddScoped<ILegacyBranchService, LegacyBranchService>();
 
         // Security
-        services.AddScoped<IValidator<GetTokenRequest>, GetTokenRequestValidator>();
-        services.AddScoped<IValidator<ValidateTokenRequest>, ValidateTokenRequestValidator>();
         services.AddScoped<ISecurityService, LegacySecurityService>();
 
         // Vehicle
-        services.AddScoped<IValidator<Contracts.Legacy.Vehicle.WsGetMezziRequest>, WsGetMezziRequestValidator>();
         services.AddScoped<ILegacyVehicleService, LegacyVehicleService>();
 
         // Estimate
-        services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetAllCategorieRequest>, WsGetAllCategorieRequestValidator>();
-        services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetKmsRequest>, GetKmsRequestValidator>();
-        services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetDefaultValuesRequest>, WsGetDefaultValuesRequestValidator>();
         services.AddScoped<IDurationService, DurationService>();
         services.AddScoped<ILegacyEstimateService, LegacyEstimateService>();
 
