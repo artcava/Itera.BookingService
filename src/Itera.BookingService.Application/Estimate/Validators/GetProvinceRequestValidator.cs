@@ -1,0 +1,12 @@
+using FluentValidation;
+using Itera.BookingService.Contracts.Legacy.Estimate;
+
+namespace Itera.BookingService.Application.Estimate.Validators;
+public sealed class GetProvinceRequestValidator : AbstractValidator<WsGetProvinceRequest>
+{
+    public GetProvinceRequestValidator()
+    {
+        // Nessuna regola di business: la request non trasporta parametri
+        // La validazione del token è gestita da LegacyTokenEndpointFilter
+    }
+}

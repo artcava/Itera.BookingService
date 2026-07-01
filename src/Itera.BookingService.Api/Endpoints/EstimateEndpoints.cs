@@ -12,7 +12,6 @@ public static class EstimateEndpoints
     [
         "GetEstimate",
         "EstimateConfirmation",
-        "GetProvince",
         "GetAccessoryBooking",
         "GetAccessoryBookingFromEstimate",
         "GetNation",
@@ -75,8 +74,27 @@ public static class EstimateEndpoints
             "Restituisce i valori di default per la ricerca preventivo: " +
             "date di ritiro/consegna (oggi+1/oggi+2) e categoria veicolo predefinita. " +
             "Logica puramente in-memory, porting da WsPreventivoBL.GetDefaultValues. " +
-            "Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy e non portato.")
+            "Il ramo GetPrimoGiornoUtilePerRitiro \u00e8 disabilitato nel legacy e non portato.")
         .Produces<WsResponse<WsGetDefaultValues>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetProvince", async (
+            [FromBody] WsGetProvinceRequest request,
+            HttpContext                     httpContext,
+            ILegacyEstimateService          estimateService,
+            CancellationToken               cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(
+                await estimateService.GetProvinceAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetProvince")
+        .WithSummary("Get province list")
+        .WithDescription(
+            "Restituisce l'elenco delle province ordinate per denominazione. " +
+            "Query diretta su tabella Province (entit\u00e0 normale EF Core, nessun keyless type). " +
+            "Porting da WsPreventivoBL.GetProvince.")
+        .Produces<WsResponse<List<WsGetProvince>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

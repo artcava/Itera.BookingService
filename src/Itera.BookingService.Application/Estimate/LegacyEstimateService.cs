@@ -11,8 +11,10 @@ public sealed class LegacyEstimateService(
     IValidator<WsGetAllCategorieRequest>  getAllCategorieValidator,
     IValidator<WsGetKmsRequest>           getKmsValidator,
     IValidator<WsGetDefaultValuesRequest> getDefaultValuesValidator,
+    IValidator<WsGetProvinceRequest>      getProvinceValidator,
     IKmQueryService                       kmQueryService,
     IDurationService                      durationService,
+    IProvinceQueryService                 provinceQueryService,
     ILogger<LegacyEstimateService>        logger) : ILegacyEstimateService
 {
     private const short BrandScnd = 2;
@@ -66,14 +68,9 @@ public sealed class LegacyEstimateService(
                 Data         = []
             };
 
-        // I campi sono garantiti non-null dal validator (NotEmpty).
         var dataFrom = ParseDate(request.DataFrom!);
         var dataTo   = ParseDate(request.DataTo!);
 
-        // Calcolo durata: replica DurataBL.CalcolaDurata24HByDate del legacy.
-        // Se il periodo supera la soglia mensile, DurationService restituisce
-        // NewDataTo != null ("PeriodoSuperioreAlMese") — in quel caso si tronca
-        // la finestra a un mese e si cerca il listino mensile.
         var durata          = durationService.Calcola(dataFrom, dataTo);
         var dataToEffettiva = durata.NewDataTo ?? dataTo;
 
@@ -116,18 +113,6 @@ public sealed class LegacyEstimateService(
                 Messaggio    = validation.Errors.First().ErrorMessage
             };
 
-        // Calcolo date default: DataFrom = oggi + 1, DataTo = oggi + 2.
-        // Replica di WsPreventivoBL.GetDefaultValues (legacy).
-        //
-        // NOTA: il parametro DebugDateToday è presente nella firma del legacy
-        // ma non viene MAI usato nella BL — GetDefaultValues ignora debugDataToday
-        // e usa sempre LocalDate.Now.Date internamente. Comportamento preservato.
-        //
-        // Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy con `&& false`.
-        // Per riattivarlo occorre:
-        //   1. Aggiungere GetPrimoGiornoUtileAsync a IBranchInfoQueryService
-        //   2. Implementare lo scorrimento giorni su chiusure settimanali/extra
-        //   3. Garantire che BranchID sia valorizzato prima di invocare la query
         var dataFrom = DateTime.Today.AddDays(1);
         var dataTo   = DateTime.Today.AddDays(2);
 
@@ -143,6 +128,34 @@ public sealed class LegacyEstimateService(
             authContext.BrandId, request.BranchID, dataFrom, dataTo, result.CategoryID);
 
         return WsResponse<WsGetDefaultValues>.Ok(result);
+    }
+
+    // ------------------------------------------------------------------
+    // GetProvince
+    // ------------------------------------------------------------------
+
+    public async Task<WsResponse<List<WsGetProvince>>> GetProvinceAsync(
+        WsGetProvinceRequest request,
+        LegacyAuthContext    authContext,
+        CancellationToken    ct)
+    {
+        var validation = await getProvinceValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return new WsResponse<List<WsGetProvince>>
+            {
+                Esito        = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio    = validation.Errors.First().ErrorMessage,
+                Data         = []
+            };
+
+        var province = await provinceQueryService.GetProvinceAsync(ct);
+
+        logger.LogInformation(
+            "GetProvince: restituite {Count} province per BrandId={BrandId}",
+            province.Count, authContext.BrandId);
+
+        return WsResponse<List<WsGetProvince>>.Ok(province);
     }
 
     // ------------------------------------------------------------------

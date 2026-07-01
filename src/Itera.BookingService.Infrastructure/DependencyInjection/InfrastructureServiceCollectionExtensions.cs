@@ -1,4 +1,5 @@
 using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Infrastructure.Auth;
@@ -61,6 +62,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         // Estimate
         services.AddScoped<IKmQueryService, LegacyKmQueryService>();
+        services.AddScoped<IProvinceQueryService, LegacyProvinceQueryService>();
 
         return services;
     }
