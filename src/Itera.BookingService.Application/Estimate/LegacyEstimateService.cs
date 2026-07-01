@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 namespace Itera.BookingService.Application.Estimate;
 
 public sealed class LegacyEstimateService(
-    IValidator<WsGetAllCategorieRequest> getAllCategorieValidator,
-    IValidator<WsGetKmsRequest>          getKmsValidator,
-    IKmQueryService                      kmQueryService,
-    IDurationService                     durationService,
-    ILogger<LegacyEstimateService>       logger) : ILegacyEstimateService
+    IValidator<WsGetAllCategorieRequest>  getAllCategorieValidator,
+    IValidator<WsGetKmsRequest>           getKmsValidator,
+    IValidator<WsGetDefaultValuesRequest> getDefaultValuesValidator,
+    IKmQueryService                       kmQueryService,
+    IDurationService                      durationService,
+    ILogger<LegacyEstimateService>        logger) : ILegacyEstimateService
 {
     private const short BrandScnd = 2;
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
@@ -95,6 +96,53 @@ public sealed class LegacyEstimateService(
             request.FilialeId, request.CategoriaId, durata.CodiceDurata, durata.Giorni, opzioni.Count);
 
         return WsResponse<List<WsKmOpzione>>.Ok(opzioni);
+    }
+
+    // ------------------------------------------------------------------
+    // GetDefaultValues
+    // ------------------------------------------------------------------
+
+    public async Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
+        WsGetDefaultValuesRequest request,
+        LegacyAuthContext         authContext,
+        CancellationToken         ct)
+    {
+        var validation = await getDefaultValuesValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return new WsResponse<WsGetDefaultValues>
+            {
+                Esito        = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio    = validation.Errors.First().ErrorMessage
+            };
+
+        // Calcolo date default: DataFrom = oggi + 1, DataTo = oggi + 2.
+        // Replica di WsPreventivoBL.GetDefaultValues (legacy).
+        //
+        // NOTA: il parametro DebugDateToday è presente nella firma del legacy
+        // ma non viene MAI usato nella BL — GetDefaultValues ignora debugDataToday
+        // e usa sempre LocalDate.Now.Date internamente. Comportamento preservato.
+        //
+        // Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy con `&& false`.
+        // Per riattivarlo occorre:
+        //   1. Aggiungere GetPrimoGiornoUtileAsync a IBranchInfoQueryService
+        //   2. Implementare lo scorrimento giorni su chiusure settimanali/extra
+        //   3. Garantire che BranchID sia valorizzato prima di invocare la query
+        var dataFrom = DateTime.Today.AddDays(1);
+        var dataTo   = DateTime.Today.AddDays(2);
+
+        var result = new WsGetDefaultValues
+        {
+            DateFromFormatted = dataFrom.ToString("dd/MM/yyyy"),
+            DateToFormatted   = dataTo.ToString("dd/MM/yyyy"),
+            CategoryID        = WsCategoria.Furgone
+        };
+
+        logger.LogInformation(
+            "GetDefaultValues: BrandId={BrandId} BranchId={BranchId} DataFrom={DataFrom} DataTo={DataTo} CategoryID={CategoryID}",
+            authContext.BrandId, request.BranchID, dataFrom, dataTo, result.CategoryID);
+
+        return WsResponse<WsGetDefaultValues>.Ok(result);
     }
 
     // ------------------------------------------------------------------

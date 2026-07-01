@@ -12,7 +12,6 @@ public static class EstimateEndpoints
     [
         "GetEstimate",
         "EstimateConfirmation",
-        "GetDefaultValues",
         "GetProvince",
         "GetAccessoryBooking",
         "GetAccessoryBookingFromEstimate",
@@ -58,6 +57,26 @@ public static class EstimateEndpoints
         .WithSummary("Get available km options")
         .WithDescription("Restituisce le opzioni km disponibili per filiale, categoria veicolo e finestra temporale. Gestisce PeriodoSuperioreAlMese tronando la finestra a un mese. Porting da WsPreventivoBL.GetKms.")
         .Produces<WsResponse<List<WsKmOpzione>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetDefaultValues", async (
+            [FromBody] WsGetDefaultValuesRequest request,
+            HttpContext                          httpContext,
+            ILegacyEstimateService               estimateService,
+            CancellationToken                    cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(
+                await estimateService.GetDefaultValuesAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetDefaultValues")
+        .WithSummary("Get default rental values")
+        .WithDescription(
+            "Restituisce i valori di default per la ricerca preventivo: " +
+            "date di ritiro/consegna (oggi+1/oggi+2) e categoria veicolo predefinita. " +
+            "Logica puramente in-memory, porting da WsPreventivoBL.GetDefaultValues. " +
+            "Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy e non portato.")
+        .Produces<WsResponse<WsGetDefaultValues>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

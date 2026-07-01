@@ -70,10 +70,8 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     {
         return
         [
-            // GetKms rimosso: endpoint ora implementato (step 7 Issue #12)
             ["EstimateService", "GetEstimate"],
             ["EstimateService", "EstimateConfirmation"],
-            ["EstimateService", "GetDefaultValues"],
             ["EstimateService", "GetProvince"],
             ["EstimateService", "GetAccessoryBooking"],
             ["EstimateService", "GetAccessoryBookingFromEstimate"],
@@ -82,8 +80,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
             ["EstimateService", "GetInsuranceExtraFromEstimate"],
             ["EstimateService", "GetAmountEstimate"],
             ["EstimateService", "GetWholeEstimate"]
-            // VehicleService/GetVehicle rimosso: endpoint ora implementato
-            // EstimateService/GetAllCategory rimosso: endpoint ora implementato
         ];
     }
 

@@ -14,4 +14,9 @@ public interface ILegacyEstimateService
         WsGetKmsRequest  request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
+
+    Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
+        WsGetDefaultValuesRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken ct);
 }
