@@ -1,5 +1,5 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 using Itera.BookingService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

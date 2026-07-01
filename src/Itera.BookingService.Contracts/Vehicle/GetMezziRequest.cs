@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Contracts.Legacy.Vehicle;
+namespace Itera.BookingService.Contracts.Vehicle;
 
 public sealed class GetMezziRequest
 {

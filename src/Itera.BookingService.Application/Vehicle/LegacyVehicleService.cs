@@ -1,7 +1,7 @@
 using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Vehicle;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Vehicle;
 using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Vehicle;

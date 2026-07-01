@@ -1,5 +1,5 @@
 using FluentValidation;
-using Itera.BookingService.Contracts.Legacy.Vehicle;
+using Itera.BookingService.Contracts.Vehicle;
 
 namespace Itera.BookingService.Application.Vehicle;
 

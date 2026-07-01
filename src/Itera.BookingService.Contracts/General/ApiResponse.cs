@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Itera.BookingService.Contracts.Legacy;
+namespace Itera.BookingService.Contracts.General;
 
 public class ApiResponse
 {

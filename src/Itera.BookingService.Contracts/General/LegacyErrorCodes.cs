@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Contracts.Legacy;
+namespace Itera.BookingService.Contracts.General;
 
 public static class LegacyErrorCodes
 {

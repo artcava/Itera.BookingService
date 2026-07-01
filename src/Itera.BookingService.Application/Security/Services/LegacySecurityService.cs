@@ -1,6 +1,7 @@
 using FluentValidation;
 using Itera.BookingService.Application.Security.Dtos;
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

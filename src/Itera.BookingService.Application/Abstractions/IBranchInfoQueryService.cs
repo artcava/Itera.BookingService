@@ -1,4 +1,4 @@
-using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Branch;
 
 namespace Itera.BookingService.Application.Abstractions;
 

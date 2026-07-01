@@ -1,5 +1,5 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy.Vehicle;
+using Itera.BookingService.Contracts.Vehicle;
 using Itera.BookingService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

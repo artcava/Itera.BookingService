@@ -1,7 +1,7 @@
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security;
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.Options;
 using Itera.BookingService.Infrastructure.Auth;
 using Itera.BookingService.Infrastructure.Branch;
 using Itera.BookingService.Infrastructure.Estimate;

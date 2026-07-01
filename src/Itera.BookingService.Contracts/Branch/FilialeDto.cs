@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Contracts.Legacy.Branch;
+namespace Itera.BookingService.Contracts.Branch;
 
 public class FilialeDto
 {

@@ -1,7 +1,7 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Branch;
 using Microsoft.AspNetCore.Mvc;
+using Itera.BookingService.Contracts.General;
 
 namespace Itera.BookingService.Api.Endpoints;
 

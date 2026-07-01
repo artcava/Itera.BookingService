@@ -1,7 +1,8 @@
 using System.Text.Json;
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Itera.BookingService.Contracts.Abstractions;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Options;
 using Microsoft.Extensions.Options;
 
 namespace Itera.BookingService.Api.Endpoints;

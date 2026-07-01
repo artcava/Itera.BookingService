@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
 public class GetProvince
 {

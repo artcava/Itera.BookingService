@@ -1,8 +1,8 @@
 using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Estimate.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
+using Itera.BookingService.Contracts.General;
 using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Estimate;

@@ -1,4 +1,6 @@
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Abstractions;
+
+namespace Itera.BookingService.Contracts.Estimate;
 
 public class GetProvinceRequest : ILegacyTokenCarrier
 {

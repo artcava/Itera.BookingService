@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.General;
 using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Infrastructure.Execution;

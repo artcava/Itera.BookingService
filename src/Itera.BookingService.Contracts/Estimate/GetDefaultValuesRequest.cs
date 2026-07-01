@@ -1,4 +1,6 @@
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.Abstractions;
+
+namespace Itera.BookingService.Contracts.Estimate;
 
 public sealed class GetDefaultValuesRequest : ILegacyTokenCarrier
 {

@@ -1,5 +1,5 @@
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
+using Itera.BookingService.Contracts.General;
 
 namespace Itera.BookingService.Application.Abstractions;
 

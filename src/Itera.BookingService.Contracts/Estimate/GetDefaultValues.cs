@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
 /// <summary>
 /// DTO risposta per GetDefaultValues.

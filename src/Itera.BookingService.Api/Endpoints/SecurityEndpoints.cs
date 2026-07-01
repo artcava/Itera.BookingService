@@ -1,6 +1,6 @@
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.General;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Itera.BookingService.Api.Endpoints;
