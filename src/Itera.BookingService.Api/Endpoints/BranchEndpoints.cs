@@ -26,7 +26,7 @@ public static class BranchEndpoints
         .WithName("BranchService_GetAllBranches")
         .WithSummary("Get all branches")
         .WithDescription("Legacy-compatible GetAllBranches endpoint with token validation and language/date parity.")
-        .Produces<ApiResponse<List<Filiale>>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<List<FilialeDto>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         group.MapPost("/GetInfoBranch", async (
@@ -43,7 +43,7 @@ public static class BranchEndpoints
         .WithName("BranchService_GetInfoBranch")
         .WithSummary("Get branch details")
         .WithDescription("Legacy-compatible GetInfoBranch endpoint with token validation and language/date parity.")
-        .Produces<ApiResponse<Filiale?>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<FilialeDto?>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         return app;
