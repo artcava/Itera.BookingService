@@ -5,7 +5,6 @@ using Itera.BookingService.Contracts.Options;
 using Itera.BookingService.Infrastructure.Auth;
 using Itera.BookingService.Infrastructure.Branch;
 using Itera.BookingService.Infrastructure.Estimate;
-using Itera.BookingService.Infrastructure.Execution;
 using Itera.BookingService.Infrastructure.Persistence;
 using Itera.BookingService.Infrastructure.Security;
 using Itera.BookingService.Infrastructure.Vehicle;
@@ -50,7 +49,6 @@ public static class InfrastructureServiceCollectionExtensions
             // Intentional: no migrations pipeline here. The existing DB schema is authoritative.
         });
 
-        services.AddScoped<ILegacyEndpointExecutor, LegacyEndpointExecutor>();
         services.AddScoped<ITokenValidationService, LegacyTokenValidationService>();
         services.AddScoped<IBranchInfoQueryService, LegacyBranchInfoQueryService>();
 
