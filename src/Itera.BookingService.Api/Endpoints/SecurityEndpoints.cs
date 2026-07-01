@@ -21,7 +21,7 @@ public static class SecurityEndpoints
             })
             .WithName("Security_GetToken")
             .WithTags("Security")
-            .Produces<WsResponse<WsAuth>>()
+            .Produces<ApiResponse<WsAuth>>()
             .AllowAnonymous();
 
         app.MapPost("/SecurityService.svc/ValidateToken",
@@ -35,7 +35,7 @@ public static class SecurityEndpoints
             })
             .WithName("Security_ValidateToken")
             .WithTags("Security")
-            .Produces<WsResponse<object?>>()
+            .Produces<ApiResponse<object?>>()
             .AllowAnonymous();
 
         app.MapPost("/SecurityService.svc/ResetKeyCache",
@@ -49,7 +49,7 @@ public static class SecurityEndpoints
             })
             .WithName("Security_ResetKeyCache")
             .WithTags("Security")
-            .Produces<WsResponse<object?>>()
+            .Produces<ApiResponse<object?>>()
             .AddEndpointFilter<LegacyTokenEndpointFilter>();
 
         return app;

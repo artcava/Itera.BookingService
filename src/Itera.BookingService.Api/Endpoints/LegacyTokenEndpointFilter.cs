@@ -76,13 +76,13 @@ public sealed class LegacyTokenEndpointFilter(
         return null;
     }
 
-    private static WsResponse<object?> BuildInvalidTokenResponse(int errorCode)
+    private static ApiResponse<object?> BuildInvalidTokenResponse(int errorCode)
     {
         var message = errorCode == LegacyErrorCodes.ExpiredToken
             ? "Token expired"
             : "Invalid token";
 
-        return new WsResponse<object?>
+        return new ApiResponse<object?>
         {
             Esito = false,
             CodiceErrore = errorCode.ToString(),

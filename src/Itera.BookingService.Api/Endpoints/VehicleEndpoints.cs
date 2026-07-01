@@ -13,7 +13,7 @@ public static class VehicleEndpoints
         var group = app.MapGroup("/VehicleService.svc").WithTags("VehicleService");
 
         group.MapPost("/GetVehicle", async (
-            [FromBody] WsGetMezziRequest request,
+            [FromBody] GetMezziRequest request,
             HttpContext httpContext,
             ILegacyVehicleService vehicleService,
             CancellationToken cancellationToken) =>
@@ -21,7 +21,7 @@ public static class VehicleEndpoints
             if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)
                 || authContextRaw is not LegacyAuthContext authContext)
             {
-                return Results.Json(new WsResponse<object?>
+                return Results.Json(new ApiResponse<object?>
                 {
                     Esito = false,
                     CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
@@ -36,7 +36,7 @@ public static class VehicleEndpoints
         .WithName("VehicleService_GetVehicle")
         .WithSummary("Get vehicles by segment")
         .WithDescription("Legacy-compatible GetVehicle endpoint. Supports optional filters: FleetMulti (CSV), SegmentoMulti (CSV), MezzoSpeciale, GruppoID.")
-        .Produces<WsResponse<List<WsMezzoSegmento>>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<List<MezzoSegmento>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         return app;
