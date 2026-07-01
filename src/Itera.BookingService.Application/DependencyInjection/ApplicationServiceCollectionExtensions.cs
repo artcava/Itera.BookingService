@@ -15,7 +15,7 @@ public static class ApplicationServiceCollectionExtensions
     {
         // Registra automaticamente tutti gli IValidator<T> presenti nell'assembly Application.
         // Nessuna registrazione manuale necessaria: aggiungere il validator è sufficiente.
-        services.AddValidatorsFromAssemblyContaining<ApplicationServiceCollectionExtensions>(ServiceLifetime.Scoped);
+        services.AddValidatorsFromAssemblyContaining<LegacyEstimateService>(ServiceLifetime.Scoped);
 
         // Branch
         services.AddScoped<ILegacyBranchService, LegacyBranchService>();
