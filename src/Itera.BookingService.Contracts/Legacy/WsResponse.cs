@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Itera.BookingService.Contracts.Legacy;
 
 public class WsResponse
@@ -5,6 +7,13 @@ public class WsResponse
     public bool Esito { get; init; }
     public string? Messaggio { get; init; }
     public string? CodiceErrore { get; init; }
+
+    /// <summary>
+    /// Dati aggiuntivi opzionali legati all'errore (es. NewDataTo per PeriodoSuperioreAlMese).
+    /// Non serializzato se null.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, object>? ErrorExtraData { get; init; }
 
     public static WsResponse Ok() => new() { Esito = true };
 
