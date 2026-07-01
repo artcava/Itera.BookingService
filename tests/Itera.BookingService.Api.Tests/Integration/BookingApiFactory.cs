@@ -1,8 +1,10 @@
 using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Contracts.Legacy;
 using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Legacy.Estimate;
 using Itera.BookingService.Contracts.Legacy.Vehicle;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -21,11 +23,13 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			services.RemoveAll<IBranchInfoQueryService>();
 			services.RemoveAll<ISecurityService>();
 			services.RemoveAll<IVehicleQueryService>();
+			services.RemoveAll<IProvinceQueryService>();
 
 			services.AddSingleton<ITokenValidationService, FakeTokenValidationService>();
 			services.AddSingleton<IBranchInfoQueryService, FakeBranchInfoQueryService>();
 			services.AddSingleton<ISecurityService, FakeSecurityService>();
 			services.AddSingleton<IVehicleQueryService, FakeVehicleQueryService>();
+			services.AddSingleton<IProvinceQueryService, FakeProvinceQueryService>();
 		});
 	}
 
@@ -240,5 +244,18 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 
 			return Task.FromResult(result);
 		}
+	}
+
+	private sealed class FakeProvinceQueryService : IProvinceQueryService
+	{
+		private static readonly List<WsGetProvince> Province =
+		[
+			new() { CodiceProvincia = "MI", DescrizioneProvincia = "Milano" },
+			new() { CodiceProvincia = "RM", DescrizioneProvincia = "Roma" },
+			new() { CodiceProvincia = "TO", DescrizioneProvincia = "Torino" }
+		];
+
+		public Task<List<WsGetProvince>> GetProvinceAsync(CancellationToken ct = default)
+			=> Task.FromResult(Province);
 	}
 }
