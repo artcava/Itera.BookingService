@@ -97,6 +97,7 @@ public sealed class LegacyEstimateService(
 
         return WsResponse<List<WsKmOpzione>>.Ok(opzioni);
     }
+
     // ------------------------------------------------------------------
     // GetDefaultValues
     // ------------------------------------------------------------------
@@ -116,17 +117,20 @@ public sealed class LegacyEstimateService(
             };
 
         // Calcolo date default: DataFrom = oggi + 1, DataTo = oggi + 2.
-        // Replica fissa di WsPreventivoBL.GetDefaultValues (legacy).
-        // Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy
-        // con `&& false` — non portato. Per riattivarlo occorre:
-        //   1. IBranchInfoQueryService.GetPrimoGiornoUtileAsync (già esiste)
-        //   2. Aggiungere la logica di scorrimento giorni chiusura settimanale/extra
-        //   3. Validare che filialeID sia valorizzato prima di invocare la query
-        var today    = DateTime.Today;
-        var dataFrom = today.AddDays(1);
-        var dataTo   = today.AddDays(2);
+        // Replica di WsPreventivoBL.GetDefaultValues (legacy).
+        //
+        // NOTA: il parametro DebugDateToday è presente nella firma del legacy
+        // ma non viene MAI usato nella BL — GetDefaultValues ignora debugDataToday
+        // e usa sempre LocalDate.Now.Date internamente. Comportamento preservato.
+        //
+        // Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy con `&& false`.
+        // Per riattivarlo occorre:
+        //   1. Aggiungere GetPrimoGiornoUtileAsync a IBranchInfoQueryService
+        //   2. Implementare lo scorrimento giorni su chiusure settimanali/extra
+        //   3. Garantire che BranchID sia valorizzato prima di invocare la query
+        var dataFrom = DateTime.Today.AddDays(1);
+        var dataTo   = DateTime.Today.AddDays(2);
 
-        // CategoriaID default = Furgone (CategorieBL.CodiceFurgone nel legacy)
         var result = new WsGetDefaultValues
         {
             DateFromFormatted = dataFrom.ToString("dd/MM/yyyy"),
