@@ -14,8 +14,8 @@ public sealed class LegacyEstimateService(
     IDurationService                     durationService,
     ILogger<LegacyEstimateService>       logger) : ILegacyEstimateService
 {
-    // BrandID corrispondente a BrandBL.Brand.SCND nel legacy.
     private const short BrandScnd = 2;
+    private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
 
     // ------------------------------------------------------------------
     // GetAllCategory
@@ -28,8 +28,13 @@ public sealed class LegacyEstimateService(
     {
         var validation = await getAllCategorieValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-            return WsResponse<List<WsCategoria>>.ValidationError(
-                validation.Errors.First().ErrorMessage);
+            return new WsResponse<List<WsCategoria>>
+            {
+                Esito        = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio    = validation.Errors.First().ErrorMessage,
+                Data         = []
+            };
 
         var linguaId = ResolveLinguaId(request.Language);
         var lista    = BuildCategorie(linguaId, authContext.BrandId);
@@ -52,29 +57,33 @@ public sealed class LegacyEstimateService(
     {
         var validation = await getKmsValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-            return WsResponse<List<WsKmOpzione>>.ValidationError(
-                validation.Errors.First().ErrorMessage);
+            return new WsResponse<List<WsKmOpzione>>
+            {
+                Esito        = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio    = validation.Errors.First().ErrorMessage,
+                Data         = []
+            };
 
-        var dataFrom = ParseDate(request.DataFrom);
-        var dataTo   = ParseDate(request.DataTo);
+        // I campi sono garantiti non-null dal validator (NotEmpty).
+        var dataFrom = ParseDate(request.DataFrom!);
+        var dataTo   = ParseDate(request.DataTo!);
 
         // Calcolo durata: replica DurataBL.CalcolaDurata24HByDate del legacy.
         // Se il periodo supera la soglia mensile, DurationService restituisce
-        // NewDataTo != null ("PeriodoSuperioreAlMese") — in quel caso il legacy
-        // tronca la finestra a un mese e va a cercare il listino mensile (codice "M").
-        // Usiamo NewDataTo per la query EF in modo da ottenere le opzioni km
-        // del listino corretto per la durata effettiva normalizzata.
-        var durata         = durationService.Calcola(dataFrom, dataTo);
+        // NewDataTo != null ("PeriodoSuperioreAlMese") — in quel caso si tronca
+        // la finestra a un mese e si cerca il listino mensile.
+        var durata          = durationService.Calcola(dataFrom, dataTo);
         var dataToEffettiva = durata.NewDataTo ?? dataTo;
 
         if (durata.NewDataTo is not null)
             logger.LogInformation(
-                "GetKms: PeriodoSuperioreAlMese rilevato. DataTo originale={DataToOriginale} normalizzata a {DataToNormalizzata}",
+                "GetKms: PeriodoSuperioreAlMese. DataTo originale={DataToOriginale} normalizzata a {DataToNormalizzata}",
                 dataTo, dataToEffettiva);
 
         var opzioni = await kmQueryService.GetKmsAsync(
             filialeId:            request.FilialeId,
-            categoriaId:          request.CategoriaId,
+            categoriaId:          request.CategoriaId!,
             dataFrom:             dataFrom,
             dataTo:               dataToEffettiva,
             fasciaOrarioRitiro:   request.FasciaOrarioRitiro,
@@ -93,7 +102,7 @@ public sealed class LegacyEstimateService(
     // ------------------------------------------------------------------
 
     private static DateTime ParseDate(string value) =>
-        DateTime.ParseExact(value, "yyyy-MM-ddTHH:mm:ss",
+        DateTime.ParseExact(value, DateFormat,
             System.Globalization.CultureInfo.InvariantCulture);
 
     private static int ResolveLinguaId(string? language)
@@ -121,11 +130,9 @@ public sealed class LegacyEstimateService(
               };
 
         if (brandId == BrandScnd)
-        {
             lista.Add(linguaId == 2
                 ? new() { CategoryID = WsCategoria.FurgoneFrigo, Description = "Van + Refrigerated Van" }
                 : new() { CategoryID = WsCategoria.FurgoneFrigo, Description = "Furgoni + Frigo" });
-        }
 
         return lista;
     }
