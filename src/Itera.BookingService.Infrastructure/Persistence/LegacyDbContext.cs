@@ -1,4 +1,5 @@
 using Itera.BookingService.Infrastructure.Persistence.Entities;
+using Itera.BookingService.Infrastructure.Persistence.Entities.Estimate;
 using Microsoft.EntityFrameworkCore;
 
 namespace Itera.BookingService.Infrastructure.Persistence;
@@ -42,6 +43,7 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     public DbSet<Preventivo> Preventivi => Set<Preventivo>();
     public DbSet<WsTokenPreventivo> WsTokenPreventivi => Set<WsTokenPreventivo>();
     public DbSet<Listino> Listini => Set<Listino>();
+    public DbSet<ListinoFiliale> ListinoFiliali => Set<ListinoFiliale>();
     public DbSet<ListinoBrand> ListinoBrand => Set<ListinoBrand>();
     public DbSet<ListinoGiorni> ListinoGiorni => Set<ListinoGiorni>();
     public DbSet<ListinoKm> ListinoKm => Set<ListinoKm>();
