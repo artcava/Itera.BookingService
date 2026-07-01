@@ -4,5 +4,5 @@ namespace Itera.BookingService.Application.Estimate.Abstractions;
 
 public interface IProvinceQueryService
 {
-    Task<List<WsGetProvince>> GetProvinceAsync(CancellationToken ct = default);
+    Task<List<GetProvince>> GetProvinceAsync(CancellationToken ct = default);
 }

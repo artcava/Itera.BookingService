@@ -3,7 +3,7 @@ using Itera.BookingService.Contracts.Legacy.Estimate;
 
 namespace Itera.BookingService.Application.Estimate;
 
-public sealed class WsGetAllCategorieRequestValidator : AbstractValidator<WsGetAllCategorieRequest>
+public sealed class WsGetAllCategorieRequestValidator : AbstractValidator<GetAllCategorieRequest>
 {
     public WsGetAllCategorieRequestValidator()
     {

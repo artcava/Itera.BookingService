@@ -8,7 +8,7 @@ namespace Itera.BookingService.Application.Abstractions;
 /// </summary>
 public interface IKmQueryService
 {
-    Task<List<WsKmOpzione>> GetKmsAsync(
+    Task<List<KmOpzione>> GetKmsAsync(
         int    filialeId,
         string categoriaId,
         DateTime dataFrom,

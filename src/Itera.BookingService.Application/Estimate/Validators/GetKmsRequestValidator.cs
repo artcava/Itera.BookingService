@@ -7,7 +7,7 @@ namespace Itera.BookingService.Application.Estimate.Validators;
 /// Validatore per <see cref="WsGetKmsRequest"/>.
 /// Nessuna dipendenza esterna: solo regole sintattiche/semantiche sui campi.
 /// </summary>
-public sealed class GetKmsRequestValidator : AbstractValidator<WsGetKmsRequest>
+public sealed class GetKmsRequestValidator : AbstractValidator<GetKmsRequest>
 {
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
 

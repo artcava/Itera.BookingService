@@ -5,8 +5,8 @@ namespace Itera.BookingService.Application.Abstractions;
 
 public interface ILegacyVehicleService
 {
-    Task<WsResponse<List<WsMezzoSegmento>>> GetVehicleAsync(
-        WsGetMezziRequest request,
+    Task<ApiResponse<List<MezzoSegmento>>> GetVehicleAsync(
+        GetMezziRequest request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
 }

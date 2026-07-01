@@ -8,7 +8,7 @@ namespace Itera.BookingService.Infrastructure.Branch;
 
 public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IBranchInfoQueryService
 {
-    public async Task<List<WsFiliale>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
+    public async Task<List<Filiale>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
     {
         var rows = await BuildBaseBranchQuery(brandId)
             .OrderBy(x => x.FilialeID)
@@ -59,7 +59,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
             .ToList();
     }
 
-    public async Task<WsFiliale?> GetInfoBranchAsync(short brandId, int branchId, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
+    public async Task<Filiale?> GetInfoBranchAsync(short brandId, int branchId, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
     {
         var row = await BuildBaseBranchQuery(brandId)
             .Where(x => x.FilialeID == branchId)
@@ -166,7 +166,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
             .ToDictionaryAsync(t => t.Chiave!, t => t.Valore, cancellationToken);
     }
 
-    private static WsFiliale MapToWsFiliale(
+    private static Filiale MapToWsFiliale(
         BranchRawRow row,
         IReadOnlyDictionary<string, string?> translations,
         bool includeExtraData,
@@ -188,7 +188,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
                 : null;
         }
 
-        var model = new WsFiliale
+        var model = new Filiale
         {
             BranchID = row.FilialeID,
             Description = ResolveText(row.Descrizione),
@@ -221,7 +221,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
             var timeTableBranch = operativeSlots
                 .GroupBy(x => x.GiornoSettimana)
                 .OrderBy(g => g.Key)
-                .Select(g => new WsFilialeOrariOperativi
+                .Select(g => new FilialeOrariOperativi
                 {
                     Day = g.Key,
                     DayDescription = DayDescription(g.Key, languageId),
@@ -239,7 +239,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
                 selected.Date = DateTime.Today.ToString("yyyy-MM-dd");
             }
 
-            model.ExtraData = new WsFilialeExtraData
+            model.ExtraData = new FilialeExtraData
             {
                 Address = row.Indirizzo,
                 PostalCode = row.Cap,
@@ -262,7 +262,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
                 TimeSlotRetire = retireSlots,
                 TimeSlotDelivery = deliverySlots,
                 WeeklyDayOfRest = restDays
-                    .Select(x => new WsFilialeRiposoSettimanale
+                    .Select(x => new FilialeRiposoSettimanale
                     {
                         DayOfWeek = x.GiornoSettimana,
                         Description = DayDescription(x.GiornoSettimana, languageId)
@@ -283,9 +283,9 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
         return model;
     }
 
-    private static WsFilialeFasciaOrario MapFasciaOrario(FilialeFasciaOrario item)
+    private static FilialeFasciaOrario MapFasciaOrario(FilialeFasciaOrario item)
     {
-        return new WsFilialeFasciaOrario
+        return new FilialeFasciaOrario
         {
             TimeSlot = item.FilialeFasciaOrarioID,
             Description = $"{TimeToString(item.OraInizio, item.MinutiInizio)}-{TimeToString(item.OraFine, item.MinutiFine)}",
@@ -297,13 +297,13 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
         };
     }
 
-    private static List<WsFilialeGiornoChiusuraExtra> BuildClosingDates(FilialeChiusuraExtra item)
+    private static List<FilialeGiornoChiusuraExtra> BuildClosingDates(FilialeChiusuraExtra item)
     {
-        var result = new List<WsFilialeGiornoChiusuraExtra>();
+        var result = new List<FilialeGiornoChiusuraExtra>();
         var year = item.Anno ?? DateTime.Today.Year;
         if (DateTime.TryParse($"{year:D4}-{item.Mese:D2}-{item.Giorno:D2}", out var date))
         {
-            result.Add(new WsFilialeGiornoChiusuraExtra
+            result.Add(new FilialeGiornoChiusuraExtra
             {
                 DayClosureExtraID = item.FilialeChiusuraExtraID,
                 Day = date,
@@ -312,7 +312,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
 
             if (!item.Anno.HasValue && DateTime.TryParse($"{year + 1:D4}-{item.Mese:D2}-{item.Giorno:D2}", out var nextDate))
             {
-                result.Add(new WsFilialeGiornoChiusuraExtra
+                result.Add(new FilialeGiornoChiusuraExtra
                 {
                     DayClosureExtraID = item.FilialeChiusuraExtraID,
                     Day = nextDate,

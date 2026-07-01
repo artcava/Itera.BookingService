@@ -8,10 +8,10 @@ using Microsoft.Extensions.Logging;
 namespace Itera.BookingService.Application.Estimate;
 
 public sealed class LegacyEstimateService(
-    IValidator<WsGetAllCategorieRequest>  getAllCategorieValidator,
-    IValidator<WsGetKmsRequest>           getKmsValidator,
-    IValidator<WsGetDefaultValuesRequest> getDefaultValuesValidator,
-    IValidator<WsGetProvinceRequest>      getProvinceValidator,
+    IValidator<GetAllCategorieRequest>  getAllCategorieValidator,
+    IValidator<GetKmsRequest>           getKmsValidator,
+    IValidator<GetDefaultValuesRequest> getDefaultValuesValidator,
+    IValidator<GetProvinceRequest>      getProvinceValidator,
     IKmQueryService                       kmQueryService,
     IDurationService                      durationService,
     IProvinceQueryService                 provinceQueryService,
@@ -24,14 +24,14 @@ public sealed class LegacyEstimateService(
     // GetAllCategory
     // ------------------------------------------------------------------
 
-    public async Task<WsResponse<List<WsCategoria>>> GetAllCategoryAsync(
-        WsGetAllCategorieRequest request,
+    public async Task<ApiResponse<List<Categoria>>> GetAllCategoryAsync(
+        GetAllCategorieRequest request,
         LegacyAuthContext        authContext,
         CancellationToken        cancellationToken)
     {
         var validation = await getAllCategorieValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-            return new WsResponse<List<WsCategoria>>
+            return new ApiResponse<List<Categoria>>
             {
                 Esito        = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -46,21 +46,21 @@ public sealed class LegacyEstimateService(
             "GetAllCategory restituisce {Count} categorie per BrandId={BrandId} LinguaId={LinguaId}",
             lista.Count, authContext.BrandId, linguaId);
 
-        return WsResponse<List<WsCategoria>>.Ok(lista);
+        return ApiResponse<List<Categoria>>.Ok(lista);
     }
 
     // ------------------------------------------------------------------
     // GetKms
     // ------------------------------------------------------------------
 
-    public async Task<WsResponse<List<WsKmOpzione>>> GetKmsAsync(
-        WsGetKmsRequest   request,
+    public async Task<ApiResponse<List<KmOpzione>>> GetKmsAsync(
+        GetKmsRequest     request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken)
     {
         var validation = await getKmsValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-            return new WsResponse<List<WsKmOpzione>>
+            return new ApiResponse<List<KmOpzione>>
             {
                 Esito        = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -92,21 +92,21 @@ public sealed class LegacyEstimateService(
             "GetKms: FilialeId={FilialeId} CategoriaId={CategoriaId} CodiceDurata={CodiceDurata} Giorni={Giorni} Opzioni={Count}",
             request.FilialeId, request.CategoriaId, durata.CodiceDurata, durata.Giorni, opzioni.Count);
 
-        return WsResponse<List<WsKmOpzione>>.Ok(opzioni);
+        return ApiResponse<List<KmOpzione>>.Ok(opzioni);
     }
 
     // ------------------------------------------------------------------
     // GetDefaultValues
     // ------------------------------------------------------------------
 
-    public async Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
-        WsGetDefaultValuesRequest request,
-        LegacyAuthContext         authContext,
-        CancellationToken         ct)
+    public async Task<ApiResponse<GetDefaultValues>> GetDefaultValuesAsync(
+        GetDefaultValuesRequest request,
+        LegacyAuthContext       authContext,
+        CancellationToken       ct)
     {
         var validation = await getDefaultValuesValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new WsResponse<WsGetDefaultValues>
+            return new ApiResponse<GetDefaultValues>
             {
                 Esito        = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -116,32 +116,32 @@ public sealed class LegacyEstimateService(
         var dataFrom = DateTime.Today.AddDays(1);
         var dataTo   = DateTime.Today.AddDays(2);
 
-        var result = new WsGetDefaultValues
+        var result = new GetDefaultValues
         {
             DateFromFormatted = dataFrom.ToString("dd/MM/yyyy"),
             DateToFormatted   = dataTo.ToString("dd/MM/yyyy"),
-            CategoryID        = WsCategoria.Furgone
+            CategoryID        = Categoria.Furgone
         };
 
         logger.LogInformation(
             "GetDefaultValues: BrandId={BrandId} BranchId={BranchId} DataFrom={DataFrom} DataTo={DataTo} CategoryID={CategoryID}",
             authContext.BrandId, request.BranchID, dataFrom, dataTo, result.CategoryID);
 
-        return WsResponse<WsGetDefaultValues>.Ok(result);
+        return ApiResponse<GetDefaultValues>.Ok(result);
     }
 
     // ------------------------------------------------------------------
     // GetProvince
     // ------------------------------------------------------------------
 
-    public async Task<WsResponse<List<WsGetProvince>>> GetProvinceAsync(
-        WsGetProvinceRequest request,
+    public async Task<ApiResponse<List<GetProvince>>> GetProvinceAsync(
+        GetProvinceRequest request,
         LegacyAuthContext    authContext,
         CancellationToken    ct)
     {
         var validation = await getProvinceValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new WsResponse<List<WsGetProvince>>
+            return new ApiResponse<List<GetProvince>>
             {
                 Esito        = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -155,7 +155,7 @@ public sealed class LegacyEstimateService(
             "GetProvince: restituite {Count} province per BrandId={BrandId}",
             province.Count, authContext.BrandId);
 
-        return WsResponse<List<WsGetProvince>>.Ok(province);
+        return ApiResponse<List<GetProvince>>.Ok(province);
     }
 
     // ------------------------------------------------------------------
@@ -172,28 +172,28 @@ public sealed class LegacyEstimateService(
             ? 2
             : 1;
 
-    private static List<WsCategoria> BuildCategorie(int linguaId, short brandId)
+    private static List<Categoria> BuildCategorie(int linguaId, short brandId)
     {
         var lista = linguaId == 2
-            ? new List<WsCategoria>
+            ? new List<Categoria>
               {
-                  new() { CategoryID = WsCategoria.Auto,    Description = "Car" },
-                  new() { CategoryID = WsCategoria.Furgone, Description = "Van" },
-                  new() { CategoryID = WsCategoria.Frigo,   Description = "Refrigerated Van" },
-                  new() { CategoryID = WsCategoria.Mobility,Description = "Mobility" },
+                  new() { CategoryID = Categoria.Auto,    Description = "Car" },
+                  new() { CategoryID = Categoria.Furgone, Description = "Van" },
+                  new() { CategoryID = Categoria.Frigo,   Description = "Refrigerated Van" },
+                  new() { CategoryID = Categoria.Mobility,Description = "Mobility" },
               }
-            : new List<WsCategoria>
+            : new List<Categoria>
               {
-                  new() { CategoryID = WsCategoria.Auto,    Description = "Auto" },
-                  new() { CategoryID = WsCategoria.Furgone, Description = "Furgoni" },
-                  new() { CategoryID = WsCategoria.Frigo,   Description = "Frigo" },
-                  new() { CategoryID = WsCategoria.Mobility,Description = "Mobility" },
+                  new() { CategoryID = Categoria.Auto,    Description = "Auto" },
+                  new() { CategoryID = Categoria.Furgone, Description = "Furgoni" },
+                  new() { CategoryID = Categoria.Frigo,   Description = "Frigo" },
+                  new() { CategoryID = Categoria.Mobility,Description = "Mobility" },
               };
 
         if (brandId == BrandScnd)
             lista.Add(linguaId == 2
-                ? new() { CategoryID = WsCategoria.FurgoneFrigo, Description = "Van + Refrigerated Van" }
-                : new() { CategoryID = WsCategoria.FurgoneFrigo, Description = "Furgoni + Frigo" });
+                ? new() { CategoryID = Categoria.FurgoneFrigo, Description = "Van + Refrigerated Van" }
+                : new() { CategoryID = Categoria.FurgoneFrigo, Description = "Furgoni + Frigo" });
 
         return lista;
     }

@@ -4,7 +4,7 @@ namespace Itera.BookingService.Application.Abstractions;
 
 public interface IVehicleQueryService
 {
-    Task<List<WsMezzoSegmento>> GetMezziAsync(
+    Task<List<MezzoSegmento>> GetMezziAsync(
         string? fleetMulti,
         string? segmentoMulti,
         bool? mezzoSpeciale,

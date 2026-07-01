@@ -1,7 +1,7 @@
 using FluentValidation;
 
 public sealed class WsGetDefaultValuesRequestValidator
-    : AbstractValidator<WsGetDefaultValuesRequest>
+    : AbstractValidator<GetDefaultValuesRequest>
 {
     public WsGetDefaultValuesRequestValidator()
     {

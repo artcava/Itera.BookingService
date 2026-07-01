@@ -3,7 +3,7 @@ using Itera.BookingService.Contracts.Legacy.Vehicle;
 
 namespace Itera.BookingService.Application.Vehicle;
 
-public sealed class WsGetMezziRequestValidator : AbstractValidator<WsGetMezziRequest>
+public sealed class WsGetMezziRequestValidator : AbstractValidator<GetMezziRequest>
 {
     public WsGetMezziRequestValidator()
     {

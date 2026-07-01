@@ -7,7 +7,7 @@ namespace Itera.BookingService.Infrastructure.Vehicle;
 
 public sealed class LegacyVehicleQueryService(LegacyDbContext db) : IVehicleQueryService
 {
-    public async Task<List<WsMezzoSegmento>> GetMezziAsync(
+    public async Task<List<MezzoSegmento>> GetMezziAsync(
         string? fleetMulti,
         string? segmentoMulti,
         bool? mezzoSpeciale,
@@ -42,7 +42,7 @@ public sealed class LegacyVehicleQueryService(LegacyDbContext db) : IVehicleQuer
                && (segmentoList == null || segmentoList.Contains(sm.CodiceSegmento))
                && (gruppoId     == null || (mmg != null && mmg.GruppoID == gruppoId))
             orderby sm.Ordinamento ascending
-            select new WsMezzoSegmento
+            select new MezzoSegmento
             {
                 ModelloMezzoID                     = mm.ModelloMezzoID,
                 Marca                              = ma.Descrizione,
