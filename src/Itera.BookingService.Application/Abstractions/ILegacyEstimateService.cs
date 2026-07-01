@@ -11,12 +11,17 @@ public interface ILegacyEstimateService
         CancellationToken        cancellationToken);
 
     Task<WsResponse<List<WsKmOpzione>>> GetKmsAsync(
-        WsGetKmsRequest  request,
+        WsGetKmsRequest   request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
 
     Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
         WsGetDefaultValuesRequest request,
-        LegacyAuthContext authContext,
-        CancellationToken ct);
+        LegacyAuthContext         authContext,
+        CancellationToken         ct);
+
+    Task<WsResponse<List<WsGetProvince>>> GetProvinceAsync(
+        WsGetProvinceRequest request,
+        LegacyAuthContext    authContext,
+        CancellationToken    ct);
 }
