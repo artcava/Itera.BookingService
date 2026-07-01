@@ -10,7 +10,6 @@ public static class EstimateEndpoints
 {
     private static readonly IReadOnlyList<string> _notImplementedMethods =
     [
-        "GetKms",
         "GetEstimate",
         "EstimateConfirmation",
         "GetDefaultValues",
@@ -38,13 +37,27 @@ public static class EstimateEndpoints
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
-            var response = await estimateService.GetAllCategoryAsync(request, authContext, cancellationToken);
-            return Results.Json(response);
+            return Results.Json(await estimateService.GetAllCategoryAsync(request, authContext, cancellationToken));
         })
         .WithName("EstimateService_GetAllCategory")
         .WithSummary("Get all vehicle categories")
         .WithDescription("Restituisce le categorie di veicolo disponibili localizzate per lingua e filtrate per brand. Logica puramente in-memory, porting da WsPreventivoBL.GetAllCategorie.")
         .Produces<WsResponse<List<WsCategoria>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetKms", async (
+            [FromBody] WsGetKmsRequest request,
+            HttpContext httpContext,
+            ILegacyEstimateService estimateService,
+            CancellationToken cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(await estimateService.GetKmsAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetKms")
+        .WithSummary("Get available km options")
+        .WithDescription("Restituisce le opzioni km disponibili per filiale, categoria veicolo e finestra temporale. Gestisce PeriodoSuperioreAlMese tronando la finestra a un mese. Porting da WsPreventivoBL.GetKms.")
+        .Produces<WsResponse<List<WsKmOpzione>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---
