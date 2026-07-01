@@ -1,6 +1,6 @@
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
-public class WsCategoria
+public class Categoria
 {
     public const string Auto     = "A";
     public const string Furgone  = "F";

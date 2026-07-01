@@ -1,6 +1,7 @@
 using FluentValidation;
 using Itera.BookingService.Application.Security.Dtos;
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -11,14 +12,14 @@ public sealed class LegacySecurityService : ISecurityService
     private readonly ISecurityQueryService _query;
     private readonly IValidator<GetTokenRequest> _getTokenValidator;
     private readonly IValidator<ValidateTokenRequest> _validateTokenValidator;
-    private readonly LegacyAuthOptions _authOptions;
+    private readonly AuthOptions _authOptions;
     private readonly ILogger<LegacySecurityService> _logger;
 
     public LegacySecurityService(
         ISecurityQueryService query,
         IValidator<GetTokenRequest> getTokenValidator,
         IValidator<ValidateTokenRequest> validateTokenValidator,
-        IOptions<LegacyAuthOptions> authOptions,
+        IOptions<AuthOptions> authOptions,
         ILogger<LegacySecurityService> logger)
     {
         _query = query;
@@ -28,14 +29,14 @@ public sealed class LegacySecurityService : ISecurityService
         _logger = logger;
     }
 
-    public async Task<WsResponse<WsAuth>> GetTokenAsync(
+    public async Task<ApiResponse<AuthTokenData>> GetTokenAsync(
         GetTokenRequest request, CancellationToken ct = default)
     {
         var validation = await _getTokenValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
         {
             _logger.LogWarning("GetToken validazione fallita Username={Username}", request.Username);
-            return new WsResponse<WsAuth>
+            return new ApiResponse<AuthTokenData>
             {
                 Esito = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -48,12 +49,12 @@ public sealed class LegacySecurityService : ISecurityService
         if (user is null)
         {
             _logger.LogWarning("GetToken credenziali non valide Username={Username}", request.Username);
-            return new WsResponse<WsAuth>
+            return new ApiResponse<AuthTokenData>
             {
                 Esito = false,
                 CodiceErrore = "INVALID_LOGIN",
                 Messaggio = "Username o password non validi.",
-                Data = new WsAuth(null)
+                Data = new AuthTokenData(null)
             };
         }
 
@@ -63,27 +64,27 @@ public sealed class LegacySecurityService : ISecurityService
         if (token is null)
         {
             _logger.LogError("GetToken generazione token fallita WsUserID={WsUserID}", user.Value.WsUserID);
-            return new WsResponse<WsAuth>
+            return new ApiResponse<AuthTokenData>
             {
                 Esito = false,
                 CodiceErrore = "TOKEN_GENERATION_ERROR",
                 Messaggio = "Impossibile generare un token nuovo.",
-                Data = new WsAuth(null)
+                Data = new AuthTokenData(null)
             };
         }
 
         _logger.LogInformation("GetToken completato WsUserID={WsUserID} BrandID={BrandID}",
             user.Value.WsUserID, user.Value.BrandID);
 
-        return WsResponse<WsAuth>.Ok(new WsAuth(token.Value.ToString()));
+        return ApiResponse<AuthTokenData>.Ok(new AuthTokenData(token.Value.ToString()));
     }
 
-    public async Task<WsResponse<object?>> ValidateTokenAsync(
+    public async Task<ApiResponse<object?>> ValidateTokenAsync(
         ValidateTokenRequest request, CancellationToken ct = default)
     {
         var validation = await _validateTokenValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new WsResponse<object?>
+            return new ApiResponse<object?>
             {
                 Esito = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -96,7 +97,7 @@ public sealed class LegacySecurityService : ISecurityService
         if (brandId is null)
         {
             _logger.LogWarning("ValidateToken non valido o scaduto Token={Token}", request.Token);
-            return new WsResponse<object?>
+            return new ApiResponse<object?>
             {
                 Esito = false,
                 CodiceErrore = "INVALID_TOKEN",
@@ -104,16 +105,16 @@ public sealed class LegacySecurityService : ISecurityService
             };
         }
 
-        return WsResponse<object?>.Ok(null);
+        return ApiResponse<object?>.Ok(null);
     }
 
-    public Task<WsResponse<object?>> ResetKeyCacheAsync(
+    public Task<ApiResponse<object?>> ResetKeyCacheAsync(
         ResetKeyCacheRequest request, CancellationToken ct = default)
     {
         _logger.LogInformation(
             "ResetKeyCache invocato (no-op in .NET 10) KeySqlCache={KeySqlCache}",
             request.KeySqlCache ?? "<null>");
 
-        return Task.FromResult(WsResponse<object?>.Ok(null));
+        return Task.FromResult(ApiResponse<object?>.Ok(null));
     }
 }

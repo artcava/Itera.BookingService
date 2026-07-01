@@ -1,6 +1,6 @@
-namespace Itera.BookingService.Contracts.Legacy.Vehicle;
+namespace Itera.BookingService.Contracts.Vehicle;
 
-public sealed class WsGetMezziRequest
+public sealed class GetMezziRequest
 {
     public string? Token { get; set; }
 

@@ -1,8 +1,8 @@
 using FluentValidation;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 
 namespace Itera.BookingService.Application.Estimate.Validators;
-public sealed class GetProvinceRequestValidator : AbstractValidator<WsGetProvinceRequest>
+public sealed class GetProvinceRequestValidator : AbstractValidator<GetProvinceRequest>
 {
     public GetProvinceRequestValidator()
     {

@@ -1,6 +1,6 @@
-namespace Itera.BookingService.Contracts.Legacy;
+namespace Itera.BookingService.Contracts.General;
 
-public static class LegacyErrorCodes
+public static class ApiErrorCodes
 {
     public const int Success = 0;
     public const int InvalidToken = -100;

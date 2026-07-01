@@ -2,11 +2,11 @@
   "ConnectionStrings": {
     "LegacyMain": "Server=<DEV_SERVER>;Database=RentalSoftware;User Id=<USERNAME>;Password=<PASSWORD>;TrustServerCertificate=True"
   },
-  "LegacyInfrastructure": {
+  "Infrastructure": {
     "EnableDetailedErrors": true,
     "CommandTimeoutSeconds": 60
   },
-  "LegacyAuth": {
+  "Auth": {
     "HeaderName": "X-Api-Token",
     "TokenValidPeriodHours": 24,
     "EnablePayloadTokenFallback": true

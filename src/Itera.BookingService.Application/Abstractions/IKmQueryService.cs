@@ -1,4 +1,4 @@
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 
 namespace Itera.BookingService.Application.Abstractions;
 
@@ -8,7 +8,7 @@ namespace Itera.BookingService.Application.Abstractions;
 /// </summary>
 public interface IKmQueryService
 {
-    Task<List<WsKmOpzione>> GetKmsAsync(
+    Task<List<KmOpzione>> GetKmsAsync(
         int    filialeId,
         string categoriaId,
         DateTime dataFrom,

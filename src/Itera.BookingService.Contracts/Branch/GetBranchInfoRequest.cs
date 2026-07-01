@@ -1,6 +1,8 @@
-namespace Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Abstractions;
 
-public class WsGetFilialeInfoRequest : ILegacyTokenCarrier
+namespace Itera.BookingService.Contracts.Branch;
+
+public class GetBranchInfoRequest : ITokenCarrier
 {
     public string? Token { get; set; }
     public string? Language { get; set; }

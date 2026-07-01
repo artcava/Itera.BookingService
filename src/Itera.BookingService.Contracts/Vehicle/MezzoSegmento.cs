@@ -1,6 +1,6 @@
-namespace Itera.BookingService.Contracts.Legacy.Vehicle;
+namespace Itera.BookingService.Contracts.Vehicle;
 
-public sealed class WsMezzoSegmento
+public sealed class MezzoSegmento
 {
     public int? ModelloMezzoID { get; set; }
     public string? Marca { get; set; }

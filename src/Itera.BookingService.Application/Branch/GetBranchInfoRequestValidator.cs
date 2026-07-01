@@ -1,11 +1,11 @@
 using FluentValidation;
-using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Branch;
 
 namespace Itera.BookingService.Application.Branch;
 
-public class WsGetFilialeInfoRequestValidator : AbstractValidator<WsGetFilialeInfoRequest>
+public sealed class GetBranchInfoRequestValidator : AbstractValidator<GetBranchInfoRequest>
 {
-    public WsGetFilialeInfoRequestValidator()
+    public GetBranchInfoRequestValidator()
     {
         RuleFor(x => x.BranchID)
             .GreaterThan(0)

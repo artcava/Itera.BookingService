@@ -1,11 +1,9 @@
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
 /// <summary>
 /// Singola opzione km disponibile per un listino/durata.
-/// Replica WsKm del legacy — il nome del campo JSON "Decription" è mantenuto
-/// intenzionalmente per backward-compatibility con i client esistenti.
 /// </summary>
-public sealed class WsKmOpzione
+public sealed class KmOpzione
 {
     /// <summary>Identificativo dell'opzione km (es. "100", "UNLI").</summary>
     public string? KmId { get; set; }

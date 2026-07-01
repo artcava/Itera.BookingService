@@ -1,5 +1,5 @@
 using Itera.BookingService.Application.Estimate.Abstractions;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 using Itera.BookingService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,11 +10,11 @@ public sealed class LegacyProvinceQueryService(
     LegacyDbContext db,
     ILogger<LegacyProvinceQueryService> logger) : IProvinceQueryService
 {
-    public async Task<List<WsGetProvince>> GetProvinceAsync(CancellationToken ct = default)
+    public async Task<List<GetProvince>> GetProvinceAsync(CancellationToken ct = default)
     {
         var result = await db.Province
             .OrderBy(p => p.Denominazione)
-            .Select(p => new WsGetProvince
+            .Select(p => new GetProvince
             {
                 CodiceProvincia      = p.SiglaAutomobilistica,
                 DescrizioneProvincia = p.Denominazione

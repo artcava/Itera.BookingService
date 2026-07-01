@@ -1,7 +1,7 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Branch;
+using Itera.BookingService.Contracts.Branch;
 using Microsoft.AspNetCore.Mvc;
+using Itera.BookingService.Contracts.General;
 
 namespace Itera.BookingService.Api.Endpoints;
 
@@ -13,7 +13,7 @@ public static class BranchEndpoints
         var group = app.MapGroup("/BranchService.svc").WithTags("BranchService");
 
         group.MapPost("/GetAllBranches", async (
-            [FromBody] WsGetAllFilialiRequest request,
+            [FromBody] GetAllBranchesRequest request,
             HttpContext httpContext,
             ILegacyBranchService branchService,
             CancellationToken cancellationToken) =>
@@ -26,11 +26,11 @@ public static class BranchEndpoints
         .WithName("BranchService_GetAllBranches")
         .WithSummary("Get all branches")
         .WithDescription("Legacy-compatible GetAllBranches endpoint with token validation and language/date parity.")
-        .Produces<WsResponse<List<WsFiliale>>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<List<FilialeDto>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         group.MapPost("/GetInfoBranch", async (
-            [FromBody] WsGetFilialeInfoRequest request,
+            [FromBody] GetBranchInfoRequest request,
             HttpContext httpContext,
             ILegacyBranchService branchService,
             CancellationToken cancellationToken) =>
@@ -43,7 +43,7 @@ public static class BranchEndpoints
         .WithName("BranchService_GetInfoBranch")
         .WithSummary("Get branch details")
         .WithDescription("Legacy-compatible GetInfoBranch endpoint with token validation and language/date parity.")
-        .Produces<WsResponse<WsFiliale?>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<FilialeDto?>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         return app;

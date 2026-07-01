@@ -1,13 +1,13 @@
 using System.Text.Json.Serialization;
 
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
 /// <summary>
 /// DTO risposta per GetDefaultValues.
 /// KmID non è esposto: la BL legacy WsPreventivoBL.GetDefaultValues
 /// non valorizza mai il campo km — non fa parte del contratto di risposta.
 /// </summary>
-public sealed class WsGetDefaultValues
+public sealed class GetDefaultValues
 {
     [JsonPropertyName("DateFromFormatted")]
     public string DateFromFormatted { get; set; } = string.Empty;

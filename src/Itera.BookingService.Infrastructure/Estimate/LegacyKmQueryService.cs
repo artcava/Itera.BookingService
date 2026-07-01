@@ -1,5 +1,5 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 using Itera.BookingService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,7 +10,7 @@ public sealed class LegacyKmQueryService(
     LegacyDbContext db,
     ILogger<LegacyKmQueryService> logger) : IKmQueryService
 {
-    public async Task<List<WsKmOpzione>> GetKmsAsync(
+    public async Task<List<KmOpzione>> GetKmsAsync(
         int      filialeId,
         string   categoriaId,
         DateTime dataFrom,
@@ -47,7 +47,7 @@ public sealed class LegacyKmQueryService(
                 lg.FasciaStart <= fasciaOrarioRitiro   && fasciaOrarioRitiro   <= lg.FasciaEnd &&
                 lg.FasciaStart <= fasciaOrarioConsegna && fasciaOrarioConsegna <= lg.FasciaEnd
             orderby lkm.Ordinamento
-            select new WsKmOpzione
+            select new KmOpzione
             {
                 // KmId: usiamo il valore int come stringa, coerente con WsKm.KmID legacy.
                 // Km=0 convenzionalmente = illimitati (verificare con dati reali).

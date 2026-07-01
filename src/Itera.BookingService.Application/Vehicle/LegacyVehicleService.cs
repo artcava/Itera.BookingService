@@ -1,25 +1,25 @@
 using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Vehicle;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Vehicle;
 using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Vehicle;
 
 public sealed class LegacyVehicleService(
-    IValidator<WsGetMezziRequest> validator,
+    IValidator<GetMezziRequest> validator,
     IVehicleQueryService vehicleQueryService,
     ILogger<LegacyVehicleService> logger) : ILegacyVehicleService
 {
-    public async Task<WsResponse<List<WsMezzoSegmento>>> GetVehicleAsync(
-        WsGetMezziRequest request,
+    public async Task<ApiResponse<List<MezzoSegmento>>> GetVehicleAsync(
+        GetMezziRequest request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken)
     {
         var validation = await validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
         {
-            return new WsResponse<List<WsMezzoSegmento>>
+            return new ApiResponse<List<MezzoSegmento>>
             {
                 Esito = false,
                 CodiceErrore = "VALIDATION_ERROR",
@@ -39,6 +39,6 @@ public sealed class LegacyVehicleService(
             "GetVehicle resolved {Count} mezzi for WsUserID {WsUserID}",
             result.Count, authContext.WsUserId);
 
-        return WsResponse<List<WsMezzoSegmento>>.Ok(result);
+        return ApiResponse<List<MezzoSegmento>>.Ok(result);
     }
 }

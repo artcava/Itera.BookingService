@@ -1,8 +1,8 @@
-namespace Itera.BookingService.Contracts.Legacy;
+namespace Itera.BookingService.Contracts.Options;
 
-public class LegacyAuthOptions
+public class AuthOptions
 {
-    public const string SectionName = "LegacyAuth";
+    public const string SectionName = "Auth";
 
     public string HeaderName { get; set; } = "X-Api-Token";
 

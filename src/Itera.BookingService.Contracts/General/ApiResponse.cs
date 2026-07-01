@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Itera.BookingService.Contracts.Legacy;
+namespace Itera.BookingService.Contracts.General;
 
-public class WsResponse
+public class ApiResponse
 {
     public bool Esito { get; init; }
     public string? Messaggio { get; init; }
@@ -15,9 +15,9 @@ public class WsResponse
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, object>? ErrorExtraData { get; init; }
 
-    public static WsResponse Ok() => new() { Esito = true };
+    public static ApiResponse Ok() => new() { Esito = true };
 
-    public static WsResponse NotImplemented(string endpointName) => new()
+    public static ApiResponse NotImplemented(string endpointName) => new()
     {
         Esito = false,
         CodiceErrore = "NOT_IMPLEMENTED",
@@ -25,17 +25,17 @@ public class WsResponse
     };
 }
 
-public class WsResponse<T> : WsResponse
+public class ApiResponse<T> : ApiResponse
 {
     public T? Data { get; init; }
 
-    public static WsResponse<T> Ok(T? data) => new()
+    public static ApiResponse<T> Ok(T? data) => new()
     {
         Esito = true,
         Data = data
     };
 
-    public new static WsResponse<T> NotImplemented(string endpointName) => new()
+    public new static ApiResponse<T> NotImplemented(string endpointName) => new()
     {
         Esito = false,
         CodiceErrore = "NOT_IMPLEMENTED",

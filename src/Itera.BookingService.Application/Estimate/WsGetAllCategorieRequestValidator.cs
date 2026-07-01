@@ -1,11 +1,11 @@
 using FluentValidation;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 
 namespace Itera.BookingService.Application.Estimate;
 
-public sealed class WsGetAllCategorieRequestValidator : AbstractValidator<WsGetAllCategorieRequest>
+public sealed class GetAllCategorieRequestValidator : AbstractValidator<GetAllCategorieRequest>
 {
-    public WsGetAllCategorieRequestValidator()
+    public GetAllCategorieRequestValidator()
     {
         // Nessun campo obbligatorio: compatibilità legacy.
     }

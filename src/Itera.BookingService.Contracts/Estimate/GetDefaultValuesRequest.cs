@@ -1,6 +1,8 @@
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.Abstractions;
 
-public sealed class WsGetDefaultValuesRequest : ILegacyTokenCarrier
+namespace Itera.BookingService.Contracts.Estimate;
+
+public sealed class GetDefaultValuesRequest : ITokenCarrier
 {
     public string? Token { get; set; }
     public short BrandID { get; set; }

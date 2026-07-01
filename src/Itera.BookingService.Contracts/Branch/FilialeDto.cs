@@ -1,20 +1,20 @@
-namespace Itera.BookingService.Contracts.Legacy.Branch;
+namespace Itera.BookingService.Contracts.Branch;
 
-public class WsFiliale
+public class FilialeDto
 {
     public int BranchID { get; set; }
     public string? Description { get; set; }
     public int FranchiseID { get; set; }
-    public WsFilialeExtraData ExtraData { get; set; } = new();
-    public List<WsFilialeOrariOperativi> TimeTableBranch { get; set; } = [];
-    public WsFilialeOrariOperativi? TimeTableDaySelected { get; set; }
-    public List<WsFilialeOrariOperativi> TimeTableVariation { get; set; } = [];
+    public FilialeExtraDataDto ExtraData { get; set; } = new();
+    public List<FilialeOrariOperativiDto> TimeTableBranch { get; set; } = [];
+    public FilialeOrariOperativiDto? TimeTableDaySelected { get; set; }
+    public List<FilialeOrariOperativiDto> TimeTableVariation { get; set; } = [];
     public bool KeyBox { get; set; }
     public short StateID { get; set; }
     public bool ExcludeVAL { get; set; }
 }
 
-public class WsFilialeExtraData
+public class FilialeExtraDataDto
 {
     public string? Address { get; set; }
     public string? PostalCode { get; set; }
@@ -34,17 +34,17 @@ public class WsFilialeExtraData
     public string? CommercialManager { get; set; }
     public string? AdministrationManager { get; set; }
     public string? ParkingClient { get; set; }
-    public List<WsFilialeFasciaOrario> TimeSlotRetire { get; set; } = [];
-    public List<WsFilialeFasciaOrario> TimeSlotDelivery { get; set; } = [];
-    public List<WsFilialeRiposoSettimanale> WeeklyDayOfRest { get; set; } = [];
-    public List<WsFilialeGiornoChiusuraExtra> ClosingDayExtra { get; set; } = [];
+    public List<FilialeFasciaOrarioDto> TimeSlotRetire { get; set; } = [];
+    public List<FilialeFasciaOrarioDto> TimeSlotDelivery { get; set; } = [];
+    public List<FilialeRiposoSettimanaleDto> WeeklyDayOfRest { get; set; } = [];
+    public List<FilialeGiornoChiusuraExtraDto> ClosingDayExtra { get; set; } = [];
     public int FilialeMacroAreaID { get; set; }
     public int FilialeAreaID { get; set; }
     public int? Location { get; set; }
     public bool RentalCar { get; set; }
 }
 
-public class WsFilialeFasciaOrario
+public class FilialeFasciaOrarioDto
 {
     public int TimeSlot { get; set; }
     public string? Description { get; set; }
@@ -55,20 +55,20 @@ public class WsFilialeFasciaOrario
     public string? End { get; set; }
 }
 
-public class WsFilialeRiposoSettimanale
+public class FilialeRiposoSettimanaleDto
 {
     public int DayOfWeek { get; set; }
     public string? Description { get; set; }
 }
 
-public class WsFilialeGiornoChiusuraExtra
+public class FilialeGiornoChiusuraExtraDto
 {
     public int DayClosureExtraID { get; set; }
     public DateTime Day { get; set; }
     public string? DayFormatted { get; set; }
 }
 
-public class WsFilialeOrariOperativi
+public class FilialeOrariOperativiDto
 {
     public string? Date { get; set; }
     public int Day { get; set; }

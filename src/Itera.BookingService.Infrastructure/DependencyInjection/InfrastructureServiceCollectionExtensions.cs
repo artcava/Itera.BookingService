@@ -1,11 +1,10 @@
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security;
-using Itera.BookingService.Contracts.Legacy;
+using Itera.BookingService.Contracts.Options;
 using Itera.BookingService.Infrastructure.Auth;
 using Itera.BookingService.Infrastructure.Branch;
 using Itera.BookingService.Infrastructure.Estimate;
-using Itera.BookingService.Infrastructure.Execution;
 using Itera.BookingService.Infrastructure.Persistence;
 using Itera.BookingService.Infrastructure.Security;
 using Itera.BookingService.Infrastructure.Vehicle;
@@ -19,10 +18,10 @@ public static class InfrastructureServiceCollectionExtensions
 {
     public static IServiceCollection AddBookingInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<LegacyAuthOptions>(configuration.GetSection(LegacyAuthOptions.SectionName));
+        services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
 
-        var optionsSection = configuration.GetSection(LegacyInfrastructureOptions.SectionName);
-        var options = new LegacyInfrastructureOptions
+        var optionsSection = configuration.GetSection(InfrastructureOptions.SectionName);
+        var options = new InfrastructureOptions
         {
             EnableDetailedErrors  = bool.TryParse(optionsSection["EnableDetailedErrors"],  out var detailed) && detailed,
             CommandTimeoutSeconds = int.TryParse(optionsSection["CommandTimeoutSeconds"], out var timeout)  ? timeout : 30
@@ -50,7 +49,6 @@ public static class InfrastructureServiceCollectionExtensions
             // Intentional: no migrations pipeline here. The existing DB schema is authoritative.
         });
 
-        services.AddScoped<ILegacyEndpointExecutor, LegacyEndpointExecutor>();
         services.AddScoped<ITokenValidationService, LegacyTokenValidationService>();
         services.AddScoped<IBranchInfoQueryService, LegacyBranchInfoQueryService>();
 

@@ -1,12 +1,12 @@
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Vehicle;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Vehicle;
 
 namespace Itera.BookingService.Application.Abstractions;
 
 public interface ILegacyVehicleService
 {
-    Task<WsResponse<List<WsMezzoSegmento>>> GetVehicleAsync(
-        WsGetMezziRequest request,
+    Task<ApiResponse<List<MezzoSegmento>>> GetVehicleAsync(
+        GetMezziRequest request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
 }

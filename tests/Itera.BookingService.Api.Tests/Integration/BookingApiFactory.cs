@@ -2,10 +2,10 @@ using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
-using Itera.BookingService.Contracts.Legacy;
-using Itera.BookingService.Contracts.Legacy.Branch;
-using Itera.BookingService.Contracts.Legacy.Estimate;
-using Itera.BookingService.Contracts.Legacy.Vehicle;
+using Itera.BookingService.Contracts.General;
+using Itera.BookingService.Contracts.Branch;
+using Itera.BookingService.Contracts.Estimate;
+using Itera.BookingService.Contracts.Vehicle;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +46,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				return Task.FromResult(new TokenValidationResult
 				{
 					IsValid = true,
-					ErrorCode = LegacyErrorCodes.Success,
+					ErrorCode = ApiErrorCodes.Success,
 					WsUserId = 123,
 					BrandId = 1
 				});
@@ -57,14 +57,14 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				return Task.FromResult(new TokenValidationResult
 				{
 					IsValid = false,
-					ErrorCode = LegacyErrorCodes.ExpiredToken
+					ErrorCode = ApiErrorCodes.ExpiredToken
 				});
 			}
 
 			return Task.FromResult(new TokenValidationResult
 			{
 				IsValid = false,
-				ErrorCode = LegacyErrorCodes.InvalidToken
+				ErrorCode = ApiErrorCodes.InvalidToken
 			});
 		}
 	}
@@ -73,56 +73,56 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 	{
 		private static readonly Guid ValidToken = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001");
 
-		public Task<WsResponse<WsAuth>> GetTokenAsync(GetTokenRequest request, CancellationToken ct)
+		public Task<ApiResponse<AuthTokenData>> GetTokenAsync(GetTokenRequest request, CancellationToken ct)
 		{
 			if (request.Username == "utente_ok" && request.Password == "password_ok")
 			{
-				return Task.FromResult(new WsResponse<WsAuth>
+				return Task.FromResult(new ApiResponse<AuthTokenData>
 				{
 					Esito = true,
-					CodiceErrore = LegacyErrorCodes.Success.ToString(),
+					CodiceErrore = ApiErrorCodes.Success.ToString(),
 					Messaggio = string.Empty,
-					Data = new WsAuth(ValidToken.ToString())
+					Data = new AuthTokenData(ValidToken.ToString())
 				});
 			}
 
-			return Task.FromResult(new WsResponse<WsAuth>
+			return Task.FromResult(new ApiResponse<AuthTokenData>
 			{
 				Esito = false,
-				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+				CodiceErrore = ApiErrorCodes.InvalidToken.ToString(),
 				Messaggio = "Credenziali non valide",
 				Data = null
 			});
 		}
 
-		public Task<WsResponse<object?>> ValidateTokenAsync(ValidateTokenRequest request, CancellationToken ct)
+		public Task<ApiResponse<object?>> ValidateTokenAsync(ValidateTokenRequest request, CancellationToken ct)
 		{
 			if (request.Token == ValidToken.ToString())
 			{
-				return Task.FromResult(new WsResponse<object?>
+				return Task.FromResult(new ApiResponse<object?>
 				{
 					Esito = true,
-					CodiceErrore = LegacyErrorCodes.Success.ToString(),
+					CodiceErrore = ApiErrorCodes.Success.ToString(),
 					Messaggio = string.Empty,
 					Data = null
 				});
 			}
 
-			return Task.FromResult(new WsResponse<object?>
+			return Task.FromResult(new ApiResponse<object?>
 			{
 				Esito = false,
-				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+				CodiceErrore = ApiErrorCodes.InvalidToken.ToString(),
 				Messaggio = "Token non valido",
 				Data = null
 			});
 		}
 
-		public Task<WsResponse<object?>> ResetKeyCacheAsync(ResetKeyCacheRequest request, CancellationToken ct)
+		public Task<ApiResponse<object?>> ResetKeyCacheAsync(ResetKeyCacheRequest request, CancellationToken ct)
 		{
-			return Task.FromResult(new WsResponse<object?>
+			return Task.FromResult(new ApiResponse<object?>
 			{
 				Esito = true,
-				CodiceErrore = LegacyErrorCodes.Success.ToString(),
+				CodiceErrore = ApiErrorCodes.Success.ToString(),
 				Messaggio = string.Empty,
 				Data = null
 			});
@@ -131,9 +131,9 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 
 	private sealed class FakeBranchInfoQueryService : IBranchInfoQueryService
 	{
-		public Task<List<WsFiliale>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
+		public Task<List<FilialeDto>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
 		{
-			var list = new List<WsFiliale>
+			var list = new List<FilialeDto>
 			{
 				new()
 				{
@@ -144,8 +144,8 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 					StateID = 1,
 					ExcludeVAL = false,
 					ExtraData = getExtraData
-						? new WsFilialeExtraData { Address = "Via Roma 1", City = "Milano", Province = "MI", Region = "Lombardia" }
-						: new WsFilialeExtraData()
+						? new FilialeExtraDataDto { Address = "Via Roma 1", City = "Milano", Province = "MI", Region = "Lombardia" }
+						: new FilialeExtraDataDto()
 				},
 				new()
 				{
@@ -156,8 +156,8 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 					StateID = 2,
 					ExcludeVAL = false,
 					ExtraData = getExtraData
-					? new WsFilialeExtraData { Address = "Via Appia 2", City = "Roma", Province = "RM", Region = "Lazio" }
-					: new WsFilialeExtraData()
+					? new FilialeExtraDataDto { Address = "Via Appia 2", City = "Roma", Province = "RM", Region = "Lazio" }
+					: new FilialeExtraDataDto()
 				}
 			};
 
@@ -169,14 +169,14 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			return Task.FromResult(list);
 		}
 
-		public Task<WsFiliale?> GetInfoBranchAsync(short brandId, int branchId, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
+		public Task<FilialeDto?> GetInfoBranchAsync(short brandId, int branchId, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
 		{
 			if (branchId != 10)
 			{
-				return Task.FromResult<WsFiliale?>(null);
+				return Task.FromResult<FilialeDto?>(null);
 			}
 
-			return Task.FromResult<WsFiliale?>(new WsFiliale
+			return Task.FromResult<FilialeDto?>(new FilialeDto
 			{
 				BranchID = 10,
 				Description = "Milano Centrale",
@@ -184,7 +184,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				KeyBox = true,
 				StateID = 1,
 				ExcludeVAL = false,
-				ExtraData = new WsFilialeExtraData
+				ExtraData = new FilialeExtraDataDto
 				{
 					Address = "Via Roma 1",
 					City = "Milano",
@@ -199,7 +199,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 
 	private sealed class FakeVehicleQueryService : IVehicleQueryService
 	{
-		private static readonly List<WsMezzoSegmento> AllMezzi =
+		private static readonly List<MezzoSegmento> AllMezzi =
 		[
 			new()
 			{
@@ -227,7 +227,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			}
 		];
 
-		public Task<List<WsMezzoSegmento>> GetMezziAsync(
+		public Task<List<MezzoSegmento>> GetMezziAsync(
 			string? fleetMulti,
 			string? segmentoMulti,
 			bool? mezzoSpeciale,
@@ -248,14 +248,14 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 
 	private sealed class FakeProvinceQueryService : IProvinceQueryService
 	{
-		private static readonly List<WsGetProvince> Province =
+		private static readonly List<GetProvince> Province =
 		[
 			new() { CodiceProvincia = "MI", DescrizioneProvincia = "Milano" },
 			new() { CodiceProvincia = "RM", DescrizioneProvincia = "Roma" },
 			new() { CodiceProvincia = "TO", DescrizioneProvincia = "Torino" }
 		];
 
-		public Task<List<WsGetProvince>> GetProvinceAsync(CancellationToken ct = default)
+		public Task<List<GetProvince>> GetProvinceAsync(CancellationToken ct = default)
 			=> Task.FromResult(Province);
 	}
 }

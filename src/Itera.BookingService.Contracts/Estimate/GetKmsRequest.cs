@@ -1,10 +1,9 @@
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
 /// <summary>
 /// Request per l'endpoint EstimateService.svc/GetKms.
-/// Replica WsGetKmsRequest del legacy (extend WsRequest -> Token inline).
 /// </summary>
-public sealed class WsGetKmsRequest
+public sealed class GetKmsRequest
 {
     /// <summary>Token di autenticazione (validato da LegacyTokenEndpointFilter).</summary>
     public string? Token { get; set; }

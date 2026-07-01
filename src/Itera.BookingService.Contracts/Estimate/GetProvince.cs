@@ -1,6 +1,6 @@
-namespace Itera.BookingService.Contracts.Legacy.Estimate;
+namespace Itera.BookingService.Contracts.Estimate;
 
-public class WsGetProvince
+public class GetProvince
 {
     public string  CodiceProvincia      { get; set; } = default!;
     public string? DescrizioneProvincia { get; set; }

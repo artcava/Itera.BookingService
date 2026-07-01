@@ -1,5 +1,5 @@
 using FluentValidation;
-using Itera.BookingService.Contracts.Legacy.Estimate;
+using Itera.BookingService.Contracts.Estimate;
 
 namespace Itera.BookingService.Application.Estimate.Validators;
 
@@ -7,7 +7,7 @@ namespace Itera.BookingService.Application.Estimate.Validators;
 /// Validatore per <see cref="WsGetKmsRequest"/>.
 /// Nessuna dipendenza esterna: solo regole sintattiche/semantiche sui campi.
 /// </summary>
-public sealed class GetKmsRequestValidator : AbstractValidator<WsGetKmsRequest>
+public sealed class GetKmsRequestValidator : AbstractValidator<GetKmsRequest>
 {
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
 
