@@ -11,19 +11,19 @@ public sealed class LegacyTokenValidationService(LegacyDbContext dbContext) : IT
     {
         if (!Guid.TryParse(token, out var tokenGuid))
         {
-            return Invalid(LegacyErrorCodes.InvalidToken);
+            return Invalid(ApiErrorCodes.InvalidToken);
         }
 
         var tokenRow = await dbContext.WsTokens.FirstOrDefaultAsync(x => x.Token == tokenGuid, cancellationToken);
         if (tokenRow is null)
         {
-            return Invalid(LegacyErrorCodes.InvalidToken);
+            return Invalid(ApiErrorCodes.InvalidToken);
         }
 
         var referenceDate = tokenRow.DataUltimaModifica ?? tokenRow.DataCreazione;
         if (!referenceDate.HasValue || referenceDate.Value.AddHours(tokenValidPeriodHours) < DateTime.Now)
         {
-            return Invalid(LegacyErrorCodes.ExpiredToken);
+            return Invalid(ApiErrorCodes.ExpiredToken);
         }
 
         tokenRow.DataUltimaModifica = DateTime.Now;
@@ -32,7 +32,7 @@ public sealed class LegacyTokenValidationService(LegacyDbContext dbContext) : IT
         return new TokenValidationResult
         {
             IsValid = true,
-            ErrorCode = LegacyErrorCodes.Success,
+            ErrorCode = ApiErrorCodes.Success,
             WsUserId = tokenRow.WsUserID,
             BrandId = tokenRow.BrandID
         };

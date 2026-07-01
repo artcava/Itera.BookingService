@@ -12,14 +12,14 @@ public sealed class LegacySecurityService : ISecurityService
     private readonly ISecurityQueryService _query;
     private readonly IValidator<GetTokenRequest> _getTokenValidator;
     private readonly IValidator<ValidateTokenRequest> _validateTokenValidator;
-    private readonly LegacyAuthOptions _authOptions;
+    private readonly AuthOptions _authOptions;
     private readonly ILogger<LegacySecurityService> _logger;
 
     public LegacySecurityService(
         ISecurityQueryService query,
         IValidator<GetTokenRequest> getTokenValidator,
         IValidator<ValidateTokenRequest> validateTokenValidator,
-        IOptions<LegacyAuthOptions> authOptions,
+        IOptions<AuthOptions> authOptions,
         ILogger<LegacySecurityService> logger)
     {
         _query = query;

@@ -24,7 +24,7 @@ public static class VehicleEndpoints
                 return Results.Json(new ApiResponse<object?>
                 {
                     Esito = false,
-                    CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+                    CodiceErrore = ApiErrorCodes.InvalidToken.ToString(),
                     Messaggio = "Invalid token",
                     Data = null
                 });

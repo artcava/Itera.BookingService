@@ -9,7 +9,7 @@ namespace Itera.BookingService.Api.Endpoints;
 
 public sealed class LegacyTokenEndpointFilter(
     ITokenValidationService tokenValidationService,
-    IOptions<LegacyAuthOptions> authOptions,
+    IOptions<AuthOptions> authOptions,
     ILogger<LegacyTokenEndpointFilter> logger) : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
@@ -26,7 +26,7 @@ public sealed class LegacyTokenEndpointFilter(
         var effectiveToken = !string.IsNullOrWhiteSpace(payloadToken) ? payloadToken : headerToken;
         if (string.IsNullOrWhiteSpace(effectiveToken))
         {
-            return Results.Json(BuildInvalidTokenResponse(LegacyErrorCodes.InvalidToken));
+            return Results.Json(BuildInvalidTokenResponse(ApiErrorCodes.InvalidToken));
         }
 
         var validation = await tokenValidationService.ValidateAsync(effectiveToken, authOptions.Value.TokenValidPeriodHours, httpContext.RequestAborted);
@@ -56,7 +56,7 @@ public sealed class LegacyTokenEndpointFilter(
     {
         foreach (var argument in arguments)
         {
-            if (argument is ILegacyTokenCarrier tokenCarrier)
+            if (argument is ITokenCarrier tokenCarrier)
             {
                 return tokenCarrier.Token;
             }
@@ -79,7 +79,7 @@ public sealed class LegacyTokenEndpointFilter(
 
     private static ApiResponse<object?> BuildInvalidTokenResponse(int errorCode)
     {
-        var message = errorCode == LegacyErrorCodes.ExpiredToken
+        var message = errorCode == ApiErrorCodes.ExpiredToken
             ? "Token expired"
             : "Invalid token";
 

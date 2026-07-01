@@ -49,7 +49,7 @@ public sealed class LegacyBranchService(
             return new ApiResponse<FilialeDto?>
             {
                 Esito = false,
-                CodiceErrore = LegacyErrorCodes.InvalidFilialeId.ToString(),
+                CodiceErrore = ApiErrorCodes.InvalidFilialeId.ToString(),
                 Messaggio = "Invalid BranchID parameter",
                 Data = null
             };
@@ -71,7 +71,7 @@ public sealed class LegacyBranchService(
             return new ApiResponse<FilialeDto?>
             {
                 Esito = false,
-                CodiceErrore = LegacyErrorCodes.FilialeNotFound.ToString(),
+                CodiceErrore = ApiErrorCodes.FilialeNotFound.ToString(),
                 Messaggio = "Filiale inesistente",
                 Data = null
             };

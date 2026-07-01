@@ -46,7 +46,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				return Task.FromResult(new TokenValidationResult
 				{
 					IsValid = true,
-					ErrorCode = LegacyErrorCodes.Success,
+					ErrorCode = ApiErrorCodes.Success,
 					WsUserId = 123,
 					BrandId = 1
 				});
@@ -57,14 +57,14 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				return Task.FromResult(new TokenValidationResult
 				{
 					IsValid = false,
-					ErrorCode = LegacyErrorCodes.ExpiredToken
+					ErrorCode = ApiErrorCodes.ExpiredToken
 				});
 			}
 
 			return Task.FromResult(new TokenValidationResult
 			{
 				IsValid = false,
-				ErrorCode = LegacyErrorCodes.InvalidToken
+				ErrorCode = ApiErrorCodes.InvalidToken
 			});
 		}
 	}
@@ -80,7 +80,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				return Task.FromResult(new ApiResponse<AuthTokenData>
 				{
 					Esito = true,
-					CodiceErrore = LegacyErrorCodes.Success.ToString(),
+					CodiceErrore = ApiErrorCodes.Success.ToString(),
 					Messaggio = string.Empty,
 					Data = new AuthTokenData(ValidToken.ToString())
 				});
@@ -89,7 +89,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			return Task.FromResult(new ApiResponse<AuthTokenData>
 			{
 				Esito = false,
-				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+				CodiceErrore = ApiErrorCodes.InvalidToken.ToString(),
 				Messaggio = "Credenziali non valide",
 				Data = null
 			});
@@ -102,7 +102,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				return Task.FromResult(new ApiResponse<object?>
 				{
 					Esito = true,
-					CodiceErrore = LegacyErrorCodes.Success.ToString(),
+					CodiceErrore = ApiErrorCodes.Success.ToString(),
 					Messaggio = string.Empty,
 					Data = null
 				});
@@ -111,7 +111,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			return Task.FromResult(new ApiResponse<object?>
 			{
 				Esito = false,
-				CodiceErrore = LegacyErrorCodes.InvalidToken.ToString(),
+				CodiceErrore = ApiErrorCodes.InvalidToken.ToString(),
 				Messaggio = "Token non valido",
 				Data = null
 			});
@@ -122,7 +122,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			return Task.FromResult(new ApiResponse<object?>
 			{
 				Esito = true,
-				CodiceErrore = LegacyErrorCodes.Success.ToString(),
+				CodiceErrore = ApiErrorCodes.Success.ToString(),
 				Messaggio = string.Empty,
 				Data = null
 			});

@@ -1,6 +1,6 @@
 namespace Itera.BookingService.Contracts.Abstractions;
 
-public interface ILegacyTokenCarrier
+public interface ITokenCarrier
 {
     string? Token { get; }
 }

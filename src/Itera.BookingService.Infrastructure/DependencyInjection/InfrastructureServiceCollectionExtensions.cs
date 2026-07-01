@@ -19,10 +19,10 @@ public static class InfrastructureServiceCollectionExtensions
 {
     public static IServiceCollection AddBookingInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<LegacyAuthOptions>(configuration.GetSection(LegacyAuthOptions.SectionName));
+        services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
 
-        var optionsSection = configuration.GetSection(LegacyInfrastructureOptions.SectionName);
-        var options = new LegacyInfrastructureOptions
+        var optionsSection = configuration.GetSection(InfrastructureOptions.SectionName);
+        var options = new InfrastructureOptions
         {
             EnableDetailedErrors  = bool.TryParse(optionsSection["EnableDetailedErrors"],  out var detailed) && detailed,
             CommandTimeoutSeconds = int.TryParse(optionsSection["CommandTimeoutSeconds"], out var timeout)  ? timeout : 30
