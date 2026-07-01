@@ -102,12 +102,11 @@ public static class EstimateEndpoints
         foreach (var method in _notImplementedMethods)
         {
             var capturedMethod = method;
-            group.MapPost($"/{capturedMethod}", async (
-                [FromBody] JsonElement payload,
-                ILegacyEndpointExecutor executor,
-                CancellationToken cancellationToken) =>
+            group.MapPost($"/{capturedMethod}", (
+                [FromBody] JsonElement _,
+                CancellationToken __) =>
             {
-                var response = await executor.ExecuteJsonAsync("EstimateService", capturedMethod, payload, cancellationToken);
+                var response = ApiResponse<object?>.NotImplemented($"EstimateService/{capturedMethod}");
                 return Results.Json(response);
             })
             .WithName($"EstimateService_{capturedMethod}")
