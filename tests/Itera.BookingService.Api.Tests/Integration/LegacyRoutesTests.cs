@@ -70,7 +70,7 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
     {
         return
         [
-            ["EstimateService", "GetKms"],
+            // GetKms rimosso: endpoint ora implementato (step 7 Issue #12)
             ["EstimateService", "GetEstimate"],
             ["EstimateService", "EstimateConfirmation"],
             ["EstimateService", "GetDefaultValues"],
@@ -127,6 +127,32 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
         var data = payload.GetProperty("data");
         Assert.Equal("Car", data[0].GetProperty("description").GetString());
         Assert.Equal("Van", data[1].GetProperty("description").GetString());
+    }
+
+    [Fact]
+    public async Task GetKms_Empty_Payload_Returns_ValidationError()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetKms", new { });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.False(payload.GetProperty("esito").GetBoolean());
+        Assert.Equal("VALIDATION_ERROR", payload.GetProperty("codiceErrore").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(payload.GetProperty("messaggio").GetString()));
+    }
+
+    [Fact]
+    public async Task GetKms_Response_Shape_Is_WsResponse_Contract()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetKms", new { });
+
+        response.EnsureSuccessStatusCode();
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var propertyNames = payload.EnumerateObject().Select(x => x.Name).OrderBy(x => x).ToArray();
+        Assert.Equal(["codiceErrore", "data", "esito", "messaggio"], propertyNames);
     }
 
     // -------------------------------------------------------------------------
