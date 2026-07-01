@@ -109,7 +109,7 @@ public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IB
     {
         return
             from f in dbContext.Filiali.AsNoTracking()
-            join fc in dbContext.Franchises.AsNoTracking() on f.FilialeID equals fc.FranchiseID
+            join fc in dbContext.Franchises.AsNoTracking() on f.FranchiseID equals fc.FranchiseID
             join ft in dbContext.FilialeTesti.AsNoTracking() on f.FilialeID equals ft.FilialeID
             join fa in dbContext.FilialeAree.AsNoTracking() on f.FilialeAreaID equals fa.FilialeAreaID
             join fb in dbContext.FilialeBrands.AsNoTracking() on f.FilialeID equals fb.FilialeID
