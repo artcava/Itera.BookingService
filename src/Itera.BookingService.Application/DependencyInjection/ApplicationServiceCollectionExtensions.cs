@@ -33,6 +33,7 @@ public static class ApplicationServiceCollectionExtensions
         // Estimate
         services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetAllCategorieRequest>, WsGetAllCategorieRequestValidator>();
         services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetKmsRequest>, GetKmsRequestValidator>();
+        services.AddScoped<IValidator<Contracts.Legacy.Estimate.WsGetDefaultValuesRequest>, WsGetDefaultValuesRequestValidator>();
         services.AddScoped<IDurationService, DurationService>();
         services.AddScoped<ILegacyEstimateService, LegacyEstimateService>();
 
