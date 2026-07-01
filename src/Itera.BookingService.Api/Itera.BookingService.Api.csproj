@@ -15,10 +15,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-    <!-- Pin Microsoft.OpenApi to 2.3.1 to override the vulnerable 2.3.0
-         pulled transitively by Swashbuckle.AspNetCore 10.0.1 (NU1903 / GHSA-v5pm-xwqc-g5wc).
-         Remove this pin once Swashbuckle upgrades its dependency. -->
-    <PackageReference Include="Microsoft.OpenApi" Version="2.3.1" />
+    <!-- Pin Microsoft.OpenApi >= 2.7.5 to override the vulnerable 2.x versions
+         pulled transitively by Swashbuckle.AspNetCore 10.0.1.
+         Vulnerability: GHSA-v5pm-xwqc-g5wc (stack overflow DoS via circular schema refs).
+         Remove this pin once Swashbuckle upgrades its own dependency. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.1.0" />
