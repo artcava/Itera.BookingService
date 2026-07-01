@@ -61,11 +61,22 @@ public static class EstimateEndpoints
 
         group.MapPost("/GetDefaultValues", async (
             [FromBody] WsGetDefaultValuesRequest request,
-            ILegacyEstimateService service,
-            LegacyAuthContext authContext,
-            CancellationToken ct) =>
-        Results.Json(await service.GetDefaultValuesAsync(request, authContext, ct)))
+            HttpContext                          httpContext,
+            ILegacyEstimateService               estimateService,
+            CancellationToken                    cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(
+                await estimateService.GetDefaultValuesAsync(request, authContext, cancellationToken));
+        })
         .WithName("EstimateService_GetDefaultValues")
+        .WithSummary("Get default rental values")
+        .WithDescription(
+            "Restituisce i valori di default per la ricerca preventivo: " +
+            "date di ritiro/consegna (oggi+1/oggi+2) e categoria veicolo predefinita. " +
+            "Logica puramente in-memory, porting da WsPreventivoBL.GetDefaultValues. " +
+            "Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy e non portato.")
+        .Produces<WsResponse<WsGetDefaultValues>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

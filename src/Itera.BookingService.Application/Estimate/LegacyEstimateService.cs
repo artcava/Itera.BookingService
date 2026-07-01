@@ -97,37 +97,48 @@ public sealed class LegacyEstimateService(
 
         return WsResponse<List<WsKmOpzione>>.Ok(opzioni);
     }
-
     // ------------------------------------------------------------------
     // GetDefaultValues
     // ------------------------------------------------------------------
 
     public async Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
         WsGetDefaultValuesRequest request,
-        LegacyAuthContext authContext,
-        CancellationToken ct)
+        LegacyAuthContext         authContext,
+        CancellationToken         ct)
     {
-        // 1. Validazione FluentValidation
-        var validationResult = await getDefaultValuesValidator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid)
-            return WsResponse<WsGetDefaultValues>.ValidationError(validationResult);
+        var validation = await getDefaultValuesValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return new WsResponse<WsGetDefaultValues>
+            {
+                Esito        = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio    = validation.Errors.First().ErrorMessage
+            };
 
-        // 2. Parsing data debug opzionale (logica da EstimateService.svc.cs)
-        DateTime? debugDateToday = null;
-        if (!string.IsNullOrWhiteSpace(request.DebugDateToday))
+        // Calcolo date default: DataFrom = oggi + 1, DataTo = oggi + 2.
+        // Replica fissa di WsPreventivoBL.GetDefaultValues (legacy).
+        // Il ramo GetPrimoGiornoUtilePerRitiro è disabilitato nel legacy
+        // con `&& false` — non portato. Per riattivarlo occorre:
+        //   1. IBranchInfoQueryService.GetPrimoGiornoUtileAsync (già esiste)
+        //   2. Aggiungere la logica di scorrimento giorni chiusura settimanale/extra
+        //   3. Validare che filialeID sia valorizzato prima di invocare la query
+        var today    = DateTime.Today;
+        var dataFrom = today.AddDays(1);
+        var dataTo   = today.AddDays(2);
+
+        // CategoriaID default = Furgone (CategorieBL.CodiceFurgone nel legacy)
+        var result = new WsGetDefaultValues
         {
-            if (!DateTime.TryParse(request.DebugDateToday, out var parsed))
-                return WsResponse<WsGetDefaultValues>.Error("INVALID_DATE", "Formato DebugDateToday non valido");
-            debugDateToday = parsed;
-        }
+            DateFromFormatted = dataFrom.ToString("dd/MM/yyyy"),
+            DateToFormatted   = dataTo.ToString("dd/MM/yyyy"),
+            CategoryID        = WsCategoria.Furgone
+        };
 
-        // 3. Delega al query service
         logger.LogInformation(
-            "GetDefaultValues - OperationName: {OperationName}, BrandId: {BrandId}, BranchId: {BranchId}",
-            nameof(GetDefaultValuesAsync), request.BrandID, request.BranchID);
+            "GetDefaultValues: BrandId={BrandId} BranchId={BranchId} DataFrom={DataFrom} DataTo={DataTo} CategoryID={CategoryID}",
+            authContext.BrandId, request.BranchID, dataFrom, dataTo, result.CategoryID);
 
-        return await _queryService.GetDefaultValuesAsync(
-            request.BrandID, request.BranchID, debugDateToday, authContext, ct);
+        return WsResponse<WsGetDefaultValues>.Ok(result);
     }
 
     // ------------------------------------------------------------------
