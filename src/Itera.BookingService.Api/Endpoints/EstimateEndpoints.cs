@@ -12,7 +12,6 @@ public static class EstimateEndpoints
     [
         "GetEstimate",
         "EstimateConfirmation",
-        "GetDefaultValues",
         "GetProvince",
         "GetAccessoryBooking",
         "GetAccessoryBookingFromEstimate",
@@ -58,6 +57,15 @@ public static class EstimateEndpoints
         .WithSummary("Get available km options")
         .WithDescription("Restituisce le opzioni km disponibili per filiale, categoria veicolo e finestra temporale. Gestisce PeriodoSuperioreAlMese tronando la finestra a un mese. Porting da WsPreventivoBL.GetKms.")
         .Produces<WsResponse<List<WsKmOpzione>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetDefaultValues", async (
+            [FromBody] WsGetDefaultValuesRequest request,
+            ILegacyEstimateService service,
+            LegacyAuthContext authContext,
+            CancellationToken ct) =>
+        Results.Json(await service.GetDefaultValuesAsync(request, authContext, ct)))
+        .WithName("EstimateService_GetDefaultValues")
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

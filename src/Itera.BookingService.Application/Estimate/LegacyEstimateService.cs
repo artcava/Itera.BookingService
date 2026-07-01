@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 namespace Itera.BookingService.Application.Estimate;
 
 public sealed class LegacyEstimateService(
-    IValidator<WsGetAllCategorieRequest> getAllCategorieValidator,
-    IValidator<WsGetKmsRequest>          getKmsValidator,
-    IKmQueryService                      kmQueryService,
-    IDurationService                     durationService,
-    ILogger<LegacyEstimateService>       logger) : ILegacyEstimateService
+    IValidator<WsGetAllCategorieRequest>  getAllCategorieValidator,
+    IValidator<WsGetKmsRequest>           getKmsValidator,
+    IValidator<WsGetDefaultValuesRequest> getDefaultValuesValidator,
+    IKmQueryService                       kmQueryService,
+    IDurationService                      durationService,
+    ILogger<LegacyEstimateService>        logger) : ILegacyEstimateService
 {
     private const short BrandScnd = 2;
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
@@ -95,6 +96,38 @@ public sealed class LegacyEstimateService(
             request.FilialeId, request.CategoriaId, durata.CodiceDurata, durata.Giorni, opzioni.Count);
 
         return WsResponse<List<WsKmOpzione>>.Ok(opzioni);
+    }
+
+    // ------------------------------------------------------------------
+    // GetDefaultValues
+    // ------------------------------------------------------------------
+
+    public async Task<WsResponse<WsGetDefaultValues>> GetDefaultValuesAsync(
+        WsGetDefaultValuesRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken ct)
+    {
+        // 1. Validazione FluentValidation
+        var validationResult = await getDefaultValuesValidator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
+            return WsResponse<WsGetDefaultValues>.ValidationError(validationResult);
+
+        // 2. Parsing data debug opzionale (logica da EstimateService.svc.cs)
+        DateTime? debugDateToday = null;
+        if (!string.IsNullOrWhiteSpace(request.DebugDateToday))
+        {
+            if (!DateTime.TryParse(request.DebugDateToday, out var parsed))
+                return WsResponse<WsGetDefaultValues>.Error("INVALID_DATE", "Formato DebugDateToday non valido");
+            debugDateToday = parsed;
+        }
+
+        // 3. Delega al query service
+        logger.LogInformation(
+            "GetDefaultValues - OperationName: {OperationName}, BrandId: {BrandId}, BranchId: {BranchId}",
+            nameof(GetDefaultValuesAsync), request.BrandID, request.BranchID);
+
+        return await _queryService.GetDefaultValuesAsync(
+            request.BrandID, request.BranchID, debugDateToday, authContext, ct);
     }
 
     // ------------------------------------------------------------------
