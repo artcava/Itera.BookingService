@@ -72,7 +72,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
         [
             ["EstimateService", "GetEstimate"],
             ["EstimateService", "EstimateConfirmation"],
-            ["EstimateService", "GetProvince"],
             ["EstimateService", "GetAccessoryBooking"],
             ["EstimateService", "GetAccessoryBookingFromEstimate"],
             ["EstimateService", "GetNation"],
@@ -149,6 +148,51 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
         var propertyNames = payload.EnumerateObject().Select(x => x.Name).OrderBy(x => x).ToArray();
         Assert.Equal(["codiceErrore", "data", "esito", "messaggio"], propertyNames);
+    }
+
+    [Fact]
+    public async Task GetProvince_Returns_Esito_True_With_Province_List()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetProvince", new { });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal(JsonValueKind.Array, data.ValueKind);
+        Assert.True(data.GetArrayLength() > 0);
+    }
+
+    [Fact]
+    public async Task GetProvince_Response_Shape_Is_WsResponse_Contract()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetProvince", new { });
+
+        response.EnsureSuccessStatusCode();
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var propertyNames = payload.EnumerateObject().Select(x => x.Name).OrderBy(x => x).ToArray();
+        Assert.Equal(["codiceErrore", "data", "esito", "messaggio"], propertyNames);
+    }
+
+    [Fact]
+    public async Task GetProvince_Each_Item_Has_CodiceProvincia_And_Descrizione()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetProvince", new { });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var data    = payload.GetProperty("data");
+        Assert.True(data.GetArrayLength() > 0);
+
+        var first = data[0];
+        Assert.True(first.TryGetProperty("codiceProvincia",      out var codice));
+        Assert.True(first.TryGetProperty("descrizioneProvincia", out _));
+        Assert.False(string.IsNullOrWhiteSpace(codice.GetString()));
     }
 
     // -------------------------------------------------------------------------
