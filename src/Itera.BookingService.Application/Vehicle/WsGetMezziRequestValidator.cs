@@ -3,9 +3,9 @@ using Itera.BookingService.Contracts.Legacy.Vehicle;
 
 namespace Itera.BookingService.Application.Vehicle;
 
-public sealed class WsGetMezziRequestValidator : AbstractValidator<GetMezziRequest>
+public sealed class GetMezziRequestValidator : AbstractValidator<GetMezziRequest>
 {
-    public WsGetMezziRequestValidator()
+    public GetMezziRequestValidator()
     {
         RuleFor(x => x.GruppoID)
             .GreaterThan(0)

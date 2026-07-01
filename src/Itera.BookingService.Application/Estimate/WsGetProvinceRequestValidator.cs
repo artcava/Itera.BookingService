@@ -3,9 +3,9 @@ using Itera.BookingService.Contracts.Legacy.Estimate;
 
 namespace Itera.BookingService.Application.Estimate;
 
-public sealed class WsGetProvinceRequestValidator : AbstractValidator<GetProvinceRequest>
+public sealed class GetProvinceRequestValidator : AbstractValidator<GetProvinceRequest>
 {
-    public WsGetProvinceRequestValidator()
+    public GetProvinceRequestValidator()
     {
         // Nessun campo obbligatorio: compatibilità legacy.
     }

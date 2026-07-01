@@ -1,22 +1,19 @@
 using FluentValidation;
+using Itera.BookingService.Contracts.Legacy.Estimate;
 
-public sealed class WsGetDefaultValuesRequestValidator
-    : AbstractValidator<GetDefaultValuesRequest>
+namespace Itera.BookingService.Application.Estimate.Validators;
+
+public sealed class GetDefaultValuesRequestValidator : AbstractValidator<GetDefaultValuesRequest>
 {
-    public WsGetDefaultValuesRequestValidator()
+    public GetDefaultValuesRequestValidator()
     {
-        // BrandID è ereditato da WsRequest e sempre obbligatorio
         RuleFor(x => x.BrandID)
             .GreaterThan((short)0)
             .WithMessage("BrandID non valido");
 
-        // BranchID opzionale, ma se presente deve essere > 0
         RuleFor(x => x.BranchID)
             .GreaterThan(0)
             .When(x => x.BranchID.HasValue)
             .WithMessage("BranchID non valido");
-
-        // DebugDateToday: nessuna validazione strutturale nel validator
-        // (nessuna dipendenza esterna, parsing avviene nel service)
     }
 }

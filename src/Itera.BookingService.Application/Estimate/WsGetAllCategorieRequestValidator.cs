@@ -3,9 +3,9 @@ using Itera.BookingService.Contracts.Legacy.Estimate;
 
 namespace Itera.BookingService.Application.Estimate;
 
-public sealed class WsGetAllCategorieRequestValidator : AbstractValidator<GetAllCategorieRequest>
+public sealed class GetAllCategorieRequestValidator : AbstractValidator<GetAllCategorieRequest>
 {
-    public WsGetAllCategorieRequestValidator()
+    public GetAllCategorieRequestValidator()
     {
         // Nessun campo obbligatorio: compatibilità legacy.
     }
