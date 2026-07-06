@@ -14,7 +14,6 @@ public interface IEstimateAccessoryQueryService
         DateTime dateTo,
         string? categoryId,
         string? segmentCode,
-        short ivaId,
         int? accordoCommercialeId,
         CancellationToken cancellationToken);
 }

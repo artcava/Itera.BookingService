@@ -215,10 +215,9 @@ public sealed class EstimateService(
         var dateFrom = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateFrom, linguaId);
         var dateTo = LegacyRequestCultureDateResolver.ResolveDateEndLegacy(request.DateTo, linguaId);
 
-        // Recupero IVA corrente e accordo commerciale dal contesto
-        // (stessa logica del legacy: ivaID e accordoCommercialeID vengono risolti
+        // Recupero accordo commerciale dal contesto
+        // (stessa logica del legacy: accordoCommercialeID viene risolto
         //  a monte prima di chiamare il layer Infrastructure)
-        var ivaId = await _ivaQueryService.GetCurrentIvaIdAsync(cancellationToken);
         var accordoCommercialeId = authContext.AccordoCommercialeId;
 
         var accessories = await estimateAccessoryQueryService.GetAccessoryBookingAsync(
@@ -231,7 +230,6 @@ public sealed class EstimateService(
             dateTo,
             request.CategoryId,
             request.SegmentCode,
-            ivaId,
             accordoCommercialeId,
             cancellationToken);
 
