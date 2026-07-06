@@ -3,7 +3,7 @@ using Itera.BookingService.Contracts.General;
 
 namespace Itera.BookingService.Application.Abstractions;
 
-public interface ILegacyEstimateService
+public interface IEstimateService
 {
     Task<ApiResponse<List<Categoria>>> GetAllCategoryAsync(
         GetAllCategorieRequest request,
@@ -24,4 +24,9 @@ public interface ILegacyEstimateService
         GetProvinceRequest request,
         LegacyAuthContext  authContext,
         CancellationToken  ct);
+
+    Task<ApiResponse<List<Nazione>>> GetNationsAsync(
+        GetNationsRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken ct);
 }

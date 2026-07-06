@@ -56,7 +56,7 @@ public sealed class LegacyTokenEndpointFilter(
     {
         foreach (var argument in arguments)
         {
-            if (argument is ITokenCarrier tokenCarrier)
+            if (argument is ILegacyTokenCarrier tokenCarrier)
             {
                 return tokenCarrier.Token;
             }

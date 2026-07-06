@@ -6,9 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Infrastructure.Estimate;
 
-public sealed class LegacyProvinceQueryService(
+public sealed class ProvinceQueryService(
     LegacyDbContext db,
-    ILogger<LegacyProvinceQueryService> logger) : IProvinceQueryService
+    ILogger<ProvinceQueryService> logger) : IProvinceQueryService
 {
     public async Task<List<GetProvince>> GetProvinceAsync(CancellationToken ct = default)
     {

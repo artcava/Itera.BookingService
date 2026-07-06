@@ -2,7 +2,7 @@ using Itera.BookingService.Contracts.Abstractions;
 
 namespace Itera.BookingService.Contracts.Branch;
 
-public class GetBranchInfoRequest : ITokenCarrier
+public class GetBranchInfoRequest : ILegacyTokenCarrier
 {
     public string? Token { get; set; }
     public string? Language { get; set; }

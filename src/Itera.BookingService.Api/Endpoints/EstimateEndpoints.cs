@@ -14,7 +14,6 @@ public static class EstimateEndpoints
         "EstimateConfirmation",
         "GetAccessoryBooking",
         "GetAccessoryBookingFromEstimate",
-        "GetNation",
         "GetInsuranceExtra",
         "GetInsuranceExtraFromEstimate",
         "GetAmountEstimate",
@@ -31,7 +30,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetAllCategory", async (
             [FromBody] GetAllCategorieRequest request,
             HttpContext httpContext,
-            ILegacyEstimateService estimateService,
+            IEstimateService estimateService,
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -46,7 +45,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetKms", async (
             [FromBody] GetKmsRequest request,
             HttpContext httpContext,
-            ILegacyEstimateService estimateService,
+            IEstimateService estimateService,
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -61,7 +60,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetDefaultValues", async (
             [FromBody] GetDefaultValuesRequest request,
             HttpContext                          httpContext,
-            ILegacyEstimateService               estimateService,
+            IEstimateService                     estimateService,
             CancellationToken                    cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -81,7 +80,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetProvince", async (
             [FromBody] GetProvinceRequest request,
             HttpContext                     httpContext,
-            ILegacyEstimateService          estimateService,
+            IEstimateService                estimateService,
             CancellationToken               cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -95,6 +94,25 @@ public static class EstimateEndpoints
             "Query diretta su tabella Province (entit\u00e0 normale EF Core, nessun keyless type). " +
             "Porting da WsPreventivoBL.GetProvince.")
         .Produces<ApiResponse<List<GetProvince>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetNation", async (
+            [FromBody] GetNationsRequest  request,
+            HttpContext                     httpContext,
+            IEstimateService                estimateService,
+            CancellationToken               cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(
+                await estimateService.GetNationsAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetNation")
+        .WithSummary("Get nations list")
+        .WithDescription(
+            "Restituisce l'elenco delle nazioni ordinate per denominazione. " +
+            "Query diretta su tabella StatiEsteri (entit\u00e0 normale EF Core, nessun keyless type). " +
+            "Porting da WsPreventivoBL.GetNation.")
+        .Produces<ApiResponse<List<Nazione>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

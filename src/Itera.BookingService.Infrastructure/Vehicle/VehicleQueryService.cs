@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Itera.BookingService.Infrastructure.Vehicle;
 
-public sealed class LegacyVehicleQueryService(LegacyDbContext db) : IVehicleQueryService
+public sealed class VehicleQueryService(LegacyDbContext db) : IVehicleQueryService
 {
     public async Task<List<MezzoSegmento>> GetMezziAsync(
         string? fleetMulti,

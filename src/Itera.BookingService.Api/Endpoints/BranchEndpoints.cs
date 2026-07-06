@@ -15,7 +15,7 @@ public static class BranchEndpoints
         group.MapPost("/GetAllBranches", async (
             [FromBody] GetAllBranchesRequest request,
             HttpContext httpContext,
-            ILegacyBranchService branchService,
+            IBranchService branchService,
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -32,7 +32,7 @@ public static class BranchEndpoints
         group.MapPost("/GetInfoBranch", async (
             [FromBody] GetBranchInfoRequest request,
             HttpContext httpContext,
-            ILegacyBranchService branchService,
+            IBranchService branchService,
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;

@@ -15,7 +15,7 @@ public static class VehicleEndpoints
         group.MapPost("/GetVehicle", async (
             [FromBody] GetMezziRequest request,
             HttpContext httpContext,
-            ILegacyVehicleService vehicleService,
+            IVehicleService vehicleService,
             CancellationToken cancellationToken) =>
         {
             if (!httpContext.Items.TryGetValue(LegacyAuthContext.ItemKey, out var authContextRaw)

@@ -6,11 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Branch;
 
-public sealed class LegacyBranchService(
+public sealed class BranchService(
     IValidator<GetAllBranchesRequest> allBranchesValidator,
     IValidator<GetBranchInfoRequest> infoBranchValidator,
     IBranchInfoQueryService branchInfoQueryService,
-    ILogger<LegacyBranchService> logger) : ILegacyBranchService
+    ILogger<BranchService> logger) : IBranchService
 {
     public async Task<ApiResponse<List<FilialeDto>>> GetAllBranchesAsync(GetAllBranchesRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
     {

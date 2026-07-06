@@ -3,7 +3,7 @@ using Itera.BookingService.Contracts.Vehicle;
 
 namespace Itera.BookingService.Application.Abstractions;
 
-public interface ILegacyVehicleService
+public interface IVehicleService
 {
     Task<ApiResponse<List<MezzoSegmento>>> GetVehicleAsync(
         GetMezziRequest request,

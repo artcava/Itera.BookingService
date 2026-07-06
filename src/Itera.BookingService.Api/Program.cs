@@ -4,7 +4,6 @@ using Itera.BookingService.Infrastructure.DependencyInjection;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.OpenApi;
 using Serilog;
-using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,9 +39,9 @@ builder.Services.AddSwaggerGen(options =>
 {
 	options.SwaggerDoc("v1", new OpenApiInfo
 	{
-		Title = "Itera BookingService Legacy API",
+		Title = "Itera BookingService API",
 		Version = "v1",
-		Description = "Legacy-compatible minimal API endpoints (.svc routes)."
+		Description = "Minimal API endpoints."
 	});
 
 	var legacyTokenScheme = new OpenApiSecurityScheme
@@ -65,7 +64,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-	options.SwaggerEndpoint("/swagger/v1/swagger.json", "Itera BookingService Legacy API v1");
+	options.SwaggerEndpoint("/swagger/v1/swagger.json", "Itera BookingService API v1");
 	options.RoutePrefix = "swagger";
 	options.DisplayRequestDuration();
 });
@@ -79,7 +78,7 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapHealthChecks("/health");
 
-app.MapLegacyServiceEndpoints();
+app.MapServiceEndpoints();
 app.MapOpenApi();
 
 app.Run();

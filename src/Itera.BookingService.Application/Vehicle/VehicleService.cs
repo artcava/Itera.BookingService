@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Vehicle;
 
-public sealed class LegacyVehicleService(
+public sealed class VehicleService(
     IValidator<GetMezziRequest> validator,
     IVehicleQueryService vehicleQueryService,
-    ILogger<LegacyVehicleService> logger) : ILegacyVehicleService
+    ILogger<VehicleService> logger) : IVehicleService
 {
     public async Task<ApiResponse<List<MezzoSegmento>>> GetVehicleAsync(
         GetMezziRequest request,
