@@ -115,6 +115,23 @@ public static class EstimateEndpoints
         .Produces<ApiResponse<List<Nazione>>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
+        group.MapPost("/GetAccessoryBooking", async (
+            [FromBody] GetAccessoryBookingRequest request,
+            HttpContext                     httpContext,
+            IEstimateService estimateService,
+            CancellationToken cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(await estimateService.GetAccessoryBookingAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetAccessoryBooking")
+        .WithSummary("Get accessory booking")
+        .WithDescription(
+            "Restituisce l'elenco degli accessori disponibili per filiale, categoria veicolo e finestra temporale. " +
+            "Porting da WsPreventivoBL.GetAccessoryBooking.")
+        .Produces<ApiResponse<List<AccessoryBookingDto>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
         // --- Stub NOT_IMPLEMENTED (da migrare) ---
 
         foreach (var method in _notImplementedMethods)

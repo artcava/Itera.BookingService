@@ -29,4 +29,9 @@ public interface IEstimateService
         GetNationsRequest request,
         LegacyAuthContext authContext,
         CancellationToken ct);
+
+    Task<ApiResponse<List<AccessoryBookingDto>>> GetAccessoryBookingAsync(
+        GetAccessoryBookingRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken);
 }
