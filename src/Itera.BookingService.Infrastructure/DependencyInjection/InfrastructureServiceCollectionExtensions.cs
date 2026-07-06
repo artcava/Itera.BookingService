@@ -61,6 +61,7 @@ public static class InfrastructureServiceCollectionExtensions
         // Estimate
         services.AddScoped<IKmQueryService, KmQueryService>();
         services.AddScoped<IProvinceQueryService, ProvinceQueryService>();
+        services.AddScoped<INationQueryService, NationQueryService>();
 
         return services;
     }

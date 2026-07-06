@@ -12,9 +12,11 @@ public sealed class EstimateService(
     IValidator<GetKmsRequest>           getKmsValidator,
     IValidator<GetDefaultValuesRequest> getDefaultValuesValidator,
     IValidator<GetProvinceRequest>      getProvinceValidator,
+    IValidator<GetNationsRequest>       getNationsValidator,
     IKmQueryService                     kmQueryService,
     IDurationService                    durationService,
     IProvinceQueryService               provinceQueryService,
+    INationQueryService                 nationQueryService,
     ILogger<EstimateService>            logger) : IEstimateService
 {
     private const short BrandScnd = 2;
@@ -156,6 +158,34 @@ public sealed class EstimateService(
             province.Count, authContext.BrandId);
 
         return ApiResponse<List<GetProvince>>.Ok(province);
+    }
+
+    // ------------------------------------------------------------------
+    // GetNations
+    // ------------------------------------------------------------------
+
+    public async Task<ApiResponse<List<Nazione>>> GetNationsAsync(
+        GetNationsRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken ct)
+    {
+        var validation = await getNationsValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return new ApiResponse<List<Nazione>>
+            {
+                Esito        = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio    = validation.Errors.First().ErrorMessage,
+                Data         = []
+            };
+
+        var nazioni = await nationQueryService.GetNationsAsync(request.Language, ct);
+
+        logger.LogInformation(
+            "GetNations: restituite {Count} nazioni per Language={Language}",
+            nazioni.Count, request.Language);
+
+        return ApiResponse<List<Nazione>>.Ok(nazioni);
     }
 
     // ------------------------------------------------------------------

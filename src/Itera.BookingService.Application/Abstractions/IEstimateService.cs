@@ -24,4 +24,9 @@ public interface IEstimateService
         GetProvinceRequest request,
         LegacyAuthContext  authContext,
         CancellationToken  ct);
+
+    Task<ApiResponse<List<Nazione>>> GetNationsAsync(
+        GetNationsRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken ct);
 }

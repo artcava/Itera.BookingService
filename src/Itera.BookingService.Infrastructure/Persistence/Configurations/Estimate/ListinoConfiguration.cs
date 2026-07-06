@@ -152,3 +152,12 @@ public class WsTokenPreventivoConfiguration : IEntityTypeConfiguration<WsTokenPr
         builder.HasKey(x => x.WsTokenPreventivoID);
     }
 }
+
+public class StatiEsteriConfiguration : IEntityTypeConfiguration<StatiEsteri>
+{
+    public void Configure(EntityTypeBuilder<StatiEsteri> builder)
+    {
+        builder.ToTable("StatiEsteri", "dbo");
+        builder.HasNoKey();
+    }
+}

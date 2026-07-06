@@ -53,6 +53,7 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     public DbSet<TipologiaFranchigia> TipologieFranchigia => Set<TipologiaFranchigia>();
     public DbSet<AccordoCommercialeListino> AccordiCommercialiListino => Set<AccordoCommercialeListino>();
     public DbSet<RegolaDiVenditaListino> RegoleDiVenditaListino => Set<RegolaDiVenditaListino>();
+    public DbSet<StatiEsteri> StatiEsteri => Set<StatiEsteri>();
 
     // Correlated query/SP/view types (Wave 2 keyless)
     public DbSet<GetFilialeInfoWs2Result> GetFilialeInfoWs2Results => Set<GetFilialeInfoWs2Result>();
