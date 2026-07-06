@@ -31,7 +31,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetAllCategory", async (
             [FromBody] GetAllCategorieRequest request,
             HttpContext httpContext,
-            ILegacyEstimateService estimateService,
+            IEstimateService estimateService,
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -46,7 +46,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetKms", async (
             [FromBody] GetKmsRequest request,
             HttpContext httpContext,
-            ILegacyEstimateService estimateService,
+            IEstimateService estimateService,
             CancellationToken cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -61,7 +61,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetDefaultValues", async (
             [FromBody] GetDefaultValuesRequest request,
             HttpContext                          httpContext,
-            ILegacyEstimateService               estimateService,
+            IEstimateService                     estimateService,
             CancellationToken                    cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
@@ -81,7 +81,7 @@ public static class EstimateEndpoints
         group.MapPost("/GetProvince", async (
             [FromBody] GetProvinceRequest request,
             HttpContext                     httpContext,
-            ILegacyEstimateService          estimateService,
+            IEstimateService                estimateService,
             CancellationToken               cancellationToken) =>
         {
             var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;

@@ -1,7 +1,6 @@
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Contracts.Branch;
 using Itera.BookingService.Infrastructure.Persistence;
-using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 // Alias per disambiguare le entity EF dai DTO omonimi

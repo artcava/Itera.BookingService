@@ -4,7 +4,6 @@ using Itera.BookingService.Infrastructure.DependencyInjection;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.OpenApi;
 using Serilog;
-using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +64,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-	options.SwaggerEndpoint("/swagger/v1/swagger.json", "Itera BookingService Legacy API v1");
+	options.SwaggerEndpoint("/swagger/v1/swagger.json", "Itera BookingService API v1");
 	options.RoutePrefix = "swagger";
 	options.DisplayRequestDuration();
 });

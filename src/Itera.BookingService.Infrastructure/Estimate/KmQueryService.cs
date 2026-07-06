@@ -6,9 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Infrastructure.Estimate;
 
-public sealed class LegacyKmQueryService(
+public sealed class KmQueryService(
     LegacyDbContext db,
-    ILogger<LegacyKmQueryService> logger) : IKmQueryService
+    ILogger<KmQueryService> logger) : IKmQueryService
 {
     public async Task<List<KmOpzione>> GetKmsAsync(
         int      filialeId,

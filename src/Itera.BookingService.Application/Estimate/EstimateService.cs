@@ -7,15 +7,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Itera.BookingService.Application.Estimate;
 
-public sealed class LegacyEstimateService(
+public sealed class EstimateService(
     IValidator<GetAllCategorieRequest>  getAllCategorieValidator,
     IValidator<GetKmsRequest>           getKmsValidator,
     IValidator<GetDefaultValuesRequest> getDefaultValuesValidator,
     IValidator<GetProvinceRequest>      getProvinceValidator,
-    IKmQueryService                       kmQueryService,
-    IDurationService                      durationService,
-    IProvinceQueryService                 provinceQueryService,
-    ILogger<LegacyEstimateService>        logger) : ILegacyEstimateService
+    IKmQueryService                     kmQueryService,
+    IDurationService                    durationService,
+    IProvinceQueryService               provinceQueryService,
+    ILogger<EstimateService>            logger) : IEstimateService
 {
     private const short BrandScnd = 2;
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";

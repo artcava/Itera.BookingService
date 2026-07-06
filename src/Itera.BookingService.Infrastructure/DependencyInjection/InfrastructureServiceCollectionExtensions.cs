@@ -56,11 +56,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ISecurityQueryService, SecurityQueryService>();
 
         // Vehicle
-        services.AddScoped<IVehicleQueryService, LegacyVehicleQueryService>();
+        services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 
         // Estimate
-        services.AddScoped<IKmQueryService, LegacyKmQueryService>();
-        services.AddScoped<IProvinceQueryService, LegacyProvinceQueryService>();
+        services.AddScoped<IKmQueryService, KmQueryService>();
+        services.AddScoped<IProvinceQueryService, ProvinceQueryService>();
 
         return services;
     }

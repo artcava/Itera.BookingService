@@ -2,7 +2,7 @@ using Itera.BookingService.Contracts.Abstractions;
 
 namespace Itera.BookingService.Contracts.Estimate;
 
-public sealed class GetDefaultValuesRequest : ITokenCarrier
+public sealed class GetDefaultValuesRequest : ILegacyTokenCarrier
 {
     public string? Token { get; set; }
     public short BrandID { get; set; }
