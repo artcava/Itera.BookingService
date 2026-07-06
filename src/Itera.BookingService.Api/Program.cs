@@ -40,9 +40,9 @@ builder.Services.AddSwaggerGen(options =>
 {
 	options.SwaggerDoc("v1", new OpenApiInfo
 	{
-		Title = "Itera BookingService Legacy API",
+		Title = "Itera BookingService API",
 		Version = "v1",
-		Description = "Legacy-compatible minimal API endpoints (.svc routes)."
+		Description = "Minimal API endpoints."
 	});
 
 	var legacyTokenScheme = new OpenApiSecurityScheme
@@ -79,7 +79,7 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapHealthChecks("/health");
 
-app.MapLegacyServiceEndpoints();
+app.MapServiceEndpoints();
 app.MapOpenApi();
 
 app.Run();
