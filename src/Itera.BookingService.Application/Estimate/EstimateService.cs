@@ -215,11 +215,6 @@ public sealed class EstimateService(
         var dateFrom = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateFrom, linguaId);
         var dateTo = LegacyRequestCultureDateResolver.ResolveDateEndLegacy(request.DateTo, linguaId);
 
-        // Recupero accordo commerciale dal contesto
-        // (stessa logica del legacy: accordoCommercialeID viene risolto
-        //  a monte prima di chiamare il layer Infrastructure)
-        var accordoCommercialeId = authContext.AccordoCommercialeId;
-
         var accessories = await estimateAccessoryQueryService.GetAccessoryBookingAsync(
             authContext.BrandId,
             request.BranchId,
@@ -230,7 +225,6 @@ public sealed class EstimateService(
             dateTo,
             request.CategoryId,
             request.SegmentCode,
-            accordoCommercialeId,
             cancellationToken);
 
         logger.LogInformation(

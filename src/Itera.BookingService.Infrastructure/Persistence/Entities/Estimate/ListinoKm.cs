@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Infrastructure.Persistence.Entities.Estimate;
+namespace Itera.BookingService.Infrastructure.Persistence.Entities;
 
 /// <summary>
 /// Tabella [dbo].[ListinoKm].

@@ -1,6 +1,8 @@
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Contracts.Estimate;
+using Itera.BookingService.Infrastructure.Estimate.Mapping;
 using Itera.BookingService.Infrastructure.Persistence;
+using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Itera.BookingService.Infrastructure.Estimate;
@@ -29,8 +31,6 @@ internal sealed class EstimateAccessoryQueryService(
         DateTime dateTo,
         string? categoryId,
         string? segmentCode,
-        short ivaId,
-        int? accordoCommercialeId,
         CancellationToken cancellationToken)
     {
         // ---------------------------------------------------------------
@@ -64,22 +64,22 @@ internal sealed class EstimateAccessoryQueryService(
         var accessori = await dbContext.AccessorioTipologie
             // INNER JOIN AccessorioFiliale  (il JOIN della TVF filtra per filiale)
             .Join(
-                dbContext.AccessorioFiliali.Where(af => af.FilialeId == branchId),
-                act => act.AccessorioTipologiaId,
-                af  => af.AccessorioTipologiaId,
+                dbContext.AccessorioFiliali.Where(af => af.FilialeID == branchId),
+                act => act.AccessorioTipologiaID,
+                af  => af.AccessorioTipologiaID,
                 (act, af) => act)
             // INNER JOIN AccessorioSegmento
             .Join(
                 dbContext.AccessorioSegmenti
                     .Where(ass => segmentiList == null || segmentiList.Count == 0
                                   || segmentiList.Contains(ass.CodiceSegmento)),
-                act => act.AccessorioTipologiaId,
-                ass => ass.AccessorioTipologiaId,
+                act => act.AccessorioTipologiaID,
+                ass => ass.AccessorioTipologiaID,
                 (act, ass) => new { Accessorio = act, ass.CodiceSegmento })
             // Filtro brand: BrandID IS NULL oppure brandID passato nullo oppure corrispondente
-            .Where(x => x.Accessorio.BrandId == null || x.Accessorio.BrandId == brandId)
+            .Where(x => x.Accessorio.BrandID == null || x.Accessorio.BrandID == brandId)
             // soloAttivi = true
-            .Where(x => x.Accessorio.StatoId == 1)
+            .Where(x => x.Accessorio.StatoID == 1)
             // canale Web
             .Where(x => x.Accessorio.VendibilitaWeb == true)
             // data validità
@@ -91,19 +91,19 @@ internal sealed class EstimateAccessoryQueryService(
             // JOIN lookup: TipologiaVoceFattura (INNER nella VwAccessori)
             .Join(
                 dbContext.TipologieVoceFattura,
-                x   => x.Accessorio.TipologiaVoceFatturaId,
-                tvf => tvf.TipologiaVoceFatturaId,
+                x   => x.Accessorio.TipologiaVoceFatturaID,
+                tvf => tvf.TipologiaVoceFatturaID,
                 (x, tvf) => new { x.Accessorio, x.CodiceSegmento, TipologiaVoceFattura = tvf })
             // JOIN lookup: AccessorioCategoria (INNER nella VwAccessori)
             .Join(
                 dbContext.AccessorioCategorie,
-                x   => x.Accessorio.AccessorioCategoriaId,
-                acc => acc.AccessorioCategoriaId,
+                x   => x.Accessorio.AccessorioCategoriaID,
+                acc => acc.AccessorioCategoriaID,
                 (x, acc) => new { x.Accessorio, x.CodiceSegmento, x.TipologiaVoceFattura, Categoria = acc })
             // LEFT JOIN Iva (LEFT OUTER nella VwAccessori)
             .GroupJoin(
-                dbContext.Ive,
-                x   => x.Accessorio.IvaId,
+                dbContext.Iva,
+                x   => x.Accessorio.IvaID,
                 iva => iva.IvaId,
                 (x, ivaGroup) => new { x, ivaGroup })
             .SelectMany(
@@ -117,7 +117,7 @@ internal sealed class EstimateAccessoryQueryService(
                     Iva = iva
                 })
             // Ordinamento identico al legacy: per categoria poi per descrizione TVF
-            .OrderBy(x => x.Accessorio.AccessorioCategoriaId)
+            .OrderBy(x => x.Accessorio.AccessorioCategoriaID)
             .ThenBy(x => x.TipologiaVoceFattura.Descrizione)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
@@ -134,39 +134,73 @@ internal sealed class EstimateAccessoryQueryService(
         //     quella a priorità più alta (stesso criterio del legacy).
         // ---------------------------------------------------------------
 
+        var dataValidita = dateFrom.Date;
+
         var accessorioTipologiaIds = accessori
-            .Select(x => x.Accessorio.AccessorioTipologiaId)
+            .Select(x => x.Accessorio.AccessorioTipologiaID)
             .Distinct()
             .ToList();
 
-        var tariffe = await dbContext.TariffaRdvs
+        var tariffarioAccordoId = await dbContext.AccordiCommercialiListino
+            .Where(x =>
+                x.ListinoID == catalogId &&
+                x.PeriodoValiditaDa <= dataValidita &&
+                x.PeriodoValiditaA >= dataValidita)
+            .Select(x => (int?)x.TariffarioID)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var tariffarioId = await (
+            from li in dbContext.Listini
+            join ta in dbContext.Tariffari on li.TariffarioId equals ta.TariffarioID
+            where li.ListinoId == catalogId
+                && (ta.BrandID == null || ta.BrandID == brandId)
+            select tariffarioAccordoId ?? li.TariffarioId
+        ).FirstOrDefaultAsync(cancellationToken);
+
+        if (tariffarioId == 0)
+            return [];
+
+        var candidateTariffe = await dbContext.TariffeRdv
             .Where(t =>
-                accessorioTipologiaIds.Contains(t.AccessorioTipologiaId) &&
-                t.ListinoId == catalogId &&
-                t.GiorniNoleggio == rentalDays &&
-                t.DataInizio <= dateFrom &&
-                t.DataFine   >= dateFrom &&
-                (accordoCommercialeId == null || t.AccordoCommercialeId == null || t.AccordoCommercialeId == accordoCommercialeId) &&
-                (brandId == 0 || t.BrandId == null || t.BrandId == brandId))
+                t.TariffarioID == tariffarioId &&
+                accessorioTipologiaIds.Contains(t.AccessorioTipologiaID) &&
+                t.ImportoFisso != null &&
+                t.ImportoFisso >= 0 &&
+                t.DataStart <= dataValidita &&
+                t.DataEnd >= dataValidita &&
+                t.BreakEven >= rentalDays)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        // Solo gli accessori per cui esiste una tariffa (come nel legacy: model.Where(m => accessoriConTariffa.Contains(...)))
-        var tariffaLookup = tariffe
-            .GroupBy(t => t.AccessorioTipologiaId)
+        var selectedTariffe = candidateTariffe
+            .GroupBy(t => t.AccessorioTipologiaID)
+            .Select(g => g.OrderBy(t => t.BreakEven).First())
+            .Where(t =>
+                t.MinGiorniApplicabilita <= rentalDays &&
+                (t.TipoImporto != "U" || t.MaxGiorniApplicabilita >= rentalDays))
+            .ToList();
+
+        var calculatedTariffaLookup = selectedTariffe
             .ToDictionary(
-                g => g.Key,
-                g => g.OrderByDescending(t => t.Priorita).First());
+                t => t.AccessorioTipologiaID,
+                t => BuildCalculatedTariffa(
+                    t,
+                    rentalDays,
+                    momentoCreazione,
+                    BuildPeriodoCompetenzaDefault(),
+                    accessori.First(x => x.Accessorio.AccessorioTipologiaID == t.AccessorioTipologiaID).Accessorio.MomentoVendibilita));
 
         // ---------------------------------------------------------------
         // 3.  Recupera percentuale IVA corrente per calcolo importo ivato.
         //     Nel legacy: IvaBL.AddIva(ivaID, importo) = importo * (1 + %)
         // ---------------------------------------------------------------
 
-        var ivaPercentuale = await dbContext.Ive
-            .Where(i => i.IvaId == ivaId)
-            .Select(i => i.Percentuale)
+        var iva = await dbContext.Iva
+            .Where(i => i.Sistema)
+            // .Select(i => i.Percentuale)
             .FirstOrDefaultAsync(cancellationToken);
+        if(iva == null)
+            throw new InvalidOperationException("Nessuna aliquota IVA di sistema trovata.");
 
         // ---------------------------------------------------------------
         // 4.  Proiezione verso AccessoryBookingDto.
@@ -176,20 +210,20 @@ internal sealed class EstimateAccessoryQueryService(
         // ---------------------------------------------------------------
 
         return accessori
-            .Where(x => tariffaLookup.ContainsKey(x.Accessorio.AccessorioTipologiaId))
+            .Where(x => calculatedTariffaLookup.ContainsKey(x.Accessorio.AccessorioTipologiaID))
             .Select(x =>
             {
-                var tariffa    = tariffaLookup[x.Accessorio.AccessorioTipologiaId];
+                var tariffa    = calculatedTariffaLookup[x.Accessorio.AccessorioTipologiaID];
                 var imponibile = tariffa.ImportoCalcolato;
-                var ivato      = imponibile * (1m + ivaPercentuale / 100m);
+                var ivato      = imponibile * (1m + iva.Percentuale / 100m);
 
                 return new AccessoryBookingDto
                 {
-                    AccessoryId          = x.Accessorio.AccessorioTipologiaId,
-                    InvoiceLineTypeId    = x.Accessorio.TipologiaVoceFatturaId,
+                    AccessoryId          = x.Accessorio.AccessorioTipologiaID,
+                    InvoiceLineTypeId    = x.Accessorio.TipologiaVoceFatturaID,
                     Code                 = x.Accessorio.Codice,
                     Description          = x.TipologiaVoceFattura.Descrizione,
-                    CategoryId           = x.Accessorio.AccessorioCategoriaId,
+                    CategoryId           = x.Accessorio.AccessorioCategoriaID,
                     CategoryCode         = x.Categoria.Codice,
                     CategoryDescription  = x.Categoria.Descrizione,
                     Mandatory            = x.Accessorio.Obbligatorio,
@@ -197,11 +231,53 @@ internal sealed class EstimateAccessoryQueryService(
                     PrepaidWeb           = x.Accessorio.PrepagamentoWeb,
                     Amount               = imponibile,
                     AmountVat            = ivato,
-                    VatId                = x.Accessorio.IvaId ?? ivaId,
-                    MomentOfSale         = x.Accessorio.MomentoVendibilita,
-                    SegmentCode          = x.CodiceSegmento
+                    VatId                = x.Accessorio.IvaID ?? iva.IvaId,
+                    MomentOfSale         = x.Accessorio.MomentoVendibilita
                 };
             })
             .ToList();
+    }
+    private static TariffaRdvBase BuildCalculatedTariffa(
+        TariffaRdv entity,
+        int giorniNoleggio,
+        string? momentoVendibilitaPreventivo,
+        PeriodoCompetenza periodoCompetenza,
+        string? momentoVendibilitaAccessorio)
+    {
+        TariffaRdvBase tariffa = entity.TipoImporto switch
+        {
+            "F" => new ImportoForfettario(),
+            "X" => new ImportoForfettarioNonRipetuto(),
+            "U" => new ImportoUnitario(),
+            _ => throw new InvalidOperationException($"TipoImporto non gestito: {entity.TipoImporto}")
+        };
+
+        tariffa.GiorniNoleggio = giorniNoleggio;
+        tariffa.MomentoVendibilitaPreventivo = momentoVendibilitaPreventivo;
+        tariffa.MomentoVendibilitaAccessorio = momentoVendibilitaAccessorio;
+        tariffa.PeriodoCompetenza = periodoCompetenza;
+
+        tariffa.TariffarioID = entity.TariffarioID;
+        tariffa.AccessorioTipologiaID = entity.AccessorioTipologiaID;
+        tariffa.DataStart = entity.DataStart;
+        tariffa.DataEnd = entity.DataEnd;
+        tariffa.BreakEven = entity.BreakEven;
+        tariffa.MinGiorniApplicabilita = entity.MinGiorniApplicabilita;
+        tariffa.MaxGiorniApplicabilita = entity.MaxGiorniApplicabilita;
+        tariffa.Percentuale = entity.Percentuale;
+        tariffa.ImportoFisso = entity.ImportoFisso ?? 0m;
+        tariffa.ImportoGiornoExtra = entity.ImportoGiornoExtra;
+        tariffa.ImportoMinAddebitabile = entity.ImportoMinAddebitabile;
+        tariffa.ImportoMaxAddebitabile = entity.ImportoMaxAddebitabile;
+        tariffa.MaxGiorniAddebitabili = entity.MaxGiorniAddebitabili;
+        tariffa.Tolleranza = entity.Tolleranza;
+        tariffa.StatoInclusione = entity.StatoInclusione;
+        tariffa.Incasso = entity.Incasso;
+
+        return tariffa;
+    }
+    private static PeriodoCompetenza BuildPeriodoCompetenzaDefault()
+    {
+        return new PeriodoCompetenza();
     }
 }

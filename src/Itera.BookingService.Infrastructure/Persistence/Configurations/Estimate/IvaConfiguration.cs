@@ -2,7 +2,7 @@ using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Itera.BookingService.Infrastructure.Persistence.Configurations.Estimate;
+namespace Itera.BookingService.Infrastructure.Persistence.Configurations;
 
 public class IvaConfiguration : IEntityTypeConfiguration<Iva>
 {

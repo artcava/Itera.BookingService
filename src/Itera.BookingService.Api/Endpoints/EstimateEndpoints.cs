@@ -12,7 +12,6 @@ public static class EstimateEndpoints
     [
         "GetEstimate",
         "EstimateConfirmation",
-        "GetAccessoryBooking",
         "GetAccessoryBookingFromEstimate",
         "GetInsuranceExtra",
         "GetInsuranceExtraFromEstimate",
