@@ -1,5 +1,5 @@
 using Itera.BookingService.Infrastructure.Persistence.Entities;
-using Itera.BookingService.Infrastructure.Persistence.Entities.Estimate;
+using Itera.BookingService.Infrastructure.Persistence.KeylessTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Itera.BookingService.Infrastructure.Persistence;
@@ -54,6 +54,22 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     public DbSet<AccordoCommercialeListino> AccordiCommercialiListino => Set<AccordoCommercialeListino>();
     public DbSet<RegolaDiVenditaListino> RegoleDiVenditaListino => Set<RegolaDiVenditaListino>();
     public DbSet<StatiEsteri> StatiEsteri => Set<StatiEsteri>();
+    public DbSet<Iva> Iva => Set<Iva>();
+
+    // Accessori
+    public DbSet<AccessorioTipologia> AccessorioTipologie => Set<AccessorioTipologia>();
+    public DbSet<AccessorioCategoria> AccessorioCategorie => Set<AccessorioCategoria>();
+    public DbSet<AccessorioFiliale> AccessorioFiliali => Set<AccessorioFiliale>();
+    public DbSet<AccessorioSegmento> AccessorioSegmenti => Set<AccessorioSegmento>();
+    public DbSet<TipologiaVoceFattura> TipologieVoceFattura => Set<TipologiaVoceFattura>();
+    public DbSet<Brand> Brand => Set<Brand>();
+    public DbSet<CategoriaFattura> CategoriaFattura => Set<CategoriaFattura>();
+    public DbSet<CategoriaSegmento> CategoriaSegmento => Set<CategoriaSegmento>();
+    public DbSet<RipartizioneFatturato> RipartizioneFatturato => Set<RipartizioneFatturato>();
+
+    // Tariffario
+    public DbSet<Tariffario> Tariffari => Set<Tariffario>();
+    public DbSet<TariffaRdv> TariffeRdv => Set<TariffaRdv>();
 
     // Correlated query/SP/view types (Wave 2 keyless)
     public DbSet<GetFilialeInfoWs2Result> GetFilialeInfoWs2Results => Set<GetFilialeInfoWs2Result>();
@@ -66,5 +82,6 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LegacyDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<GetAccessoriDettaglioResult>().HasNoKey().ToFunction("GetAccessoriDettaglio");
     }
 }

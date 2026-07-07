@@ -8,16 +8,18 @@ using Microsoft.Extensions.Logging;
 namespace Itera.BookingService.Application.Estimate;
 
 public sealed class EstimateService(
-    IValidator<GetAllCategorieRequest>  getAllCategorieValidator,
-    IValidator<GetKmsRequest>           getKmsValidator,
-    IValidator<GetDefaultValuesRequest> getDefaultValuesValidator,
-    IValidator<GetProvinceRequest>      getProvinceValidator,
-    IValidator<GetNationsRequest>       getNationsValidator,
-    IKmQueryService                     kmQueryService,
-    IDurationService                    durationService,
-    IProvinceQueryService               provinceQueryService,
-    INationQueryService                 nationQueryService,
-    ILogger<EstimateService>            logger) : IEstimateService
+    IValidator<GetAllCategorieRequest>      getAllCategorieValidator,
+    IValidator<GetKmsRequest>               getKmsValidator,
+    IValidator<GetDefaultValuesRequest>     getDefaultValuesValidator,
+    IValidator<GetProvinceRequest>          getProvinceValidator,
+    IValidator<GetNationsRequest>           getNationsValidator,
+    IValidator<GetAccessoryBookingRequest>  getAccessoryBookingValidator,
+    IKmQueryService                         kmQueryService,
+    IDurationService                        durationService,
+    IProvinceQueryService                   provinceQueryService,
+    INationQueryService                     nationQueryService,
+    IEstimateAccessoryQueryService          estimateAccessoryQueryService,
+    ILogger<EstimateService>                logger) : IEstimateService
 {
     private const short BrandScnd = 2;
     private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
@@ -186,6 +188,52 @@ public sealed class EstimateService(
             nazioni.Count, request.Language);
 
         return ApiResponse<List<Nazione>>.Ok(nazioni);
+    }
+
+    // ------------------------------------------------------------------
+    // GetAccessoryBooking
+    // ------------------------------------------------------------------
+
+    public async Task<ApiResponse<List<AccessoryBookingDto>>> GetAccessoryBookingAsync(
+        GetAccessoryBookingRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken)
+    {
+        var validation = await getAccessoryBookingValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return new ApiResponse<List<AccessoryBookingDto>>
+            {
+                Esito = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio = validation.Errors.First().ErrorMessage,
+                Data = []
+            };
+        }
+
+        var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
+        var dateFrom = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateFrom, linguaId);
+        var dateTo = LegacyRequestCultureDateResolver.ResolveDateEndLegacy(request.DateTo, linguaId);
+
+        var accessories = await estimateAccessoryQueryService.GetAccessoryBookingAsync(
+            authContext.BrandId,
+            request.BranchId,
+            request.BranchDestinationId,
+            request.CatalogId,
+            request.RentalDays,
+            dateFrom,
+            dateTo,
+            request.CategoryId,
+            request.SegmentCode,
+            cancellationToken);
+
+        logger.LogInformation(
+            "GetAccessoryBooking resolved {Count} accessories for BranchID {BranchId} WsUserID {WsUserId}",
+            accessories.Count,
+            request.BranchId,
+            authContext.WsUserId);
+
+        return ApiResponse<List<AccessoryBookingDto>>.Ok(accessories);
     }
 
     // ------------------------------------------------------------------

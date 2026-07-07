@@ -1,28 +1,161 @@
 using Itera.BookingService.Infrastructure.Persistence.Entities;
-using Itera.BookingService.Infrastructure.Persistence.Entities.Estimate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Itera.BookingService.Infrastructure.Persistence.Configurations.Estimate;
+namespace Itera.BookingService.Infrastructure.Persistence.Configurations;
 
 public class ListinoConfiguration : IEntityTypeConfiguration<Listino>
 {
     public void Configure(EntityTypeBuilder<Listino> builder)
     {
         builder.ToTable("Listino", "dbo");
+
         builder.HasKey(x => x.ListinoId);
-        builder.Property(x => x.ListinoId).HasColumnName("ListinoID");
-        builder.Property(x => x.SempreAttivo).HasColumnName("SempreAttivo").IsRequired();
-        builder.Property(x => x.InizioValidita).HasColumnName("InizioValidita");
-        builder.Property(x => x.FineValidita).HasColumnName("FineValidita");
+
+        builder.Property(x => x.ListinoId)
+            .HasColumnName("ListinoID")
+            .UseIdentityColumn();
+
+        builder.Property(x => x.Tipo)
+            .HasColumnName("Tipo")
+            .HasMaxLength(10)
+            .IsRequired();
+
+        builder.Property(x => x.Descrizione)
+            .HasColumnName("Descrizione")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Property(x => x.DataCreazione)
+            .HasColumnName("DataCreazione")
+            .IsRequired();
+
+        builder.Property(x => x.InizioValidita)
+            .HasColumnName("InizioValidita");
+
+        builder.Property(x => x.FineValidita)
+            .HasColumnName("FineValidita");
+
+        builder.Property(x => x.IsGrandiGruppi)
+            .HasColumnName("IsGrandiGruppi")
+            .IsRequired();
+
+        builder.Property(x => x.Ordinamento)
+            .HasColumnName("Ordinamento")
+            .IsRequired();
+
+        builder.Property(x => x.SempreAttivo)
+            .HasColumnName("SempreAttivo")
+            .IsRequired();
+
+        builder.Property(x => x.Stato)
+            .HasColumnName("Stato")
+            .IsRequired();
+
+        builder.Property(x => x.ListinoRaggruppamentoId)
+            .HasColumnName("ListinoRaggruppamentoID");
+
+        builder.Property(x => x.OperatoreId)
+            .HasColumnName("OperatoreID");
+
+        builder.Property(x => x.DataUltimaModifica)
+            .HasColumnName("DataUltimaModifica");
+
+        builder.Property(x => x.ListinoIdPadre)
+            .HasColumnName("ListinoIDPadre");
+
+        builder.Property(x => x.Versione)
+            .HasColumnName("Versione");
+
+        builder.Property(x => x.VersioneNome)
+            .HasColumnName("VersioneNome")
+            .HasMaxLength(100);
+
+        builder.Property(x => x.DataCreazioneOriginale)
+            .HasColumnName("DataCreazioneOriginale");
+
+        builder.Property(x => x.StatoVisibilita)
+            .HasColumnName("StatoVisibilita");
+
+        builder.Property(x => x.GuidListino)
+            .HasColumnName("GuidListino")
+            .IsRequired();
+
+        builder.Property(x => x.DataInserimento)
+            .HasColumnName("DataInserimento");
+
+        builder.Property(x => x.TariffarioId)
+            .HasColumnName("TariffarioID")
+            .IsRequired();
+
+        builder.Property(x => x.EsclusioneWalkIn)
+            .HasColumnName("EsclusioneWalkIn")
+            .IsRequired();
+
+        builder.Property(x => x.TolleranzaOraria)
+            .HasColumnName("TolleranzaOraria");
+
+        builder.Property(x => x.ProdottoOrario)
+            .HasColumnName("ProdottoOrario")
+            .IsRequired();
+
+        builder.Property(x => x.ProdottoOrarioTipoImporto)
+            .HasColumnName("ProdottoOrarioTipoImporto")
+            .HasMaxLength(1)
+            .IsFixedLength();
+
+        builder.Property(x => x.ProdottoOrarioPercentuale)
+            .HasColumnName("ProdottoOrarioPercentuale")
+            .HasPrecision(5, 2);
+
+        builder.Property(x => x.ProdottoOrarioImporto)
+            .HasColumnName("ProdottoOrarioImporto")
+            .HasColumnType("money");
+
+        builder.Property(x => x.DurataMinimaNolo)
+            .HasColumnName("DurataMinimaNolo");
+
+        builder.Property(x => x.DurataMassimaNolo)
+            .HasColumnName("DurataMassimaNolo");
+
+        builder.Property(x => x.DurataMinimaAddebitabile)
+            .HasColumnName("DurataMinimaAddebitabile");
+
+        builder.Property(x => x.TipologiaCalcoloWeekend)
+            .HasColumnName("TipologiaCalcoloWeekend")
+            .IsRequired();
+
+        builder.Property(x => x.GiornoInizioWeekend)
+            .HasColumnName("GiornoInizioWeekend");
+
+        builder.Property(x => x.GiornoFineWeekend)
+            .HasColumnName("GiornoFineWeekend");
+
+        builder.Property(x => x.OrarioInizioWeekend)
+            .HasColumnName("OrarioInizioWeekend");
+
+        builder.Property(x => x.OrarioFineWeekend)
+            .HasColumnName("OrarioFineWeekend");
+
+        builder.Property(x => x.FullCredit)
+            .HasColumnName("FullCredit")
+            .IsRequired();
+
+        builder.HasOne(x => x.Tariffario)
+            .WithMany()
+            .HasForeignKey(x => x.TariffarioId);
+
+        builder.HasOne(x => x.ListinoPadre)
+            .WithMany(x => x.ListiniFigli)
+            .HasForeignKey(x => x.ListinoIdPadre);
 
         builder.HasMany(x => x.ListinoGiorni)
-               .WithOne(x => x.Listino)
-               .HasForeignKey(x => x.ListinoId);
+            .WithOne(x => x.Listino)
+            .HasForeignKey(x => x.ListinoId);
 
         builder.HasMany(x => x.ListinoFiliali)
-               .WithOne()
-               .HasForeignKey(x => x.ListinoId);
+            .WithOne()
+            .HasForeignKey(x => x.ListinoId);
     }
 }
 
