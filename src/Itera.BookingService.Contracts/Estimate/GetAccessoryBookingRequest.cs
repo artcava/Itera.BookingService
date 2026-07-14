@@ -5,7 +5,6 @@ namespace Itera.BookingService.Contracts.Estimate;
 public sealed record GetAccessoryBookingRequest : BaseRequest, ILegacyTokenCarrier
 {
     public string? Token { get; set; }
-    public short BrandId { get; init; }
     public int BranchId { get; init; }
     public int BranchDestinationId { get; init; }
     public int CatalogId { get; init; }
