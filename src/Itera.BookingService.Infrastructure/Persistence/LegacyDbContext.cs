@@ -55,6 +55,9 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     public DbSet<RegolaDiVenditaListino> RegoleDiVenditaListino => Set<RegolaDiVenditaListino>();
     public DbSet<StatiEsteri> StatiEsteri => Set<StatiEsteri>();
     public DbSet<Iva> Iva => Set<Iva>();
+    public DbSet<ListinoFranchigiaTipologia> ListinoFranchigiaTipologie => Set<ListinoFranchigiaTipologia>();
+    public DbSet<StatoElemento> StatiElemento => Set<StatoElemento>();
+    public DbSet<TipologiaFranchigiaCategoria> TipologieFranchigiaCategoria => Set<TipologiaFranchigiaCategoria>();
 
     // Accessori
     public DbSet<AccessorioTipologia> AccessorioTipologie => Set<AccessorioTipologia>();
@@ -82,6 +85,8 @@ public class LegacyDbContext(DbContextOptions<LegacyDbContext> options) : DbCont
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LegacyDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<GetAccessoriDettaglioResult>().HasNoKey().ToFunction("GetAccessoriDettaglio");
+
+        modelBuilder.Entity<GetAccessoriDettaglioResult>()
+                    .HasNoKey().ToFunction("GetAccessoriDettaglio");
     }
 }

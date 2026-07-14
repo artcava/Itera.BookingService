@@ -73,7 +73,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
             ["EstimateService", "GetEstimate"],
             ["EstimateService", "EstimateConfirmation"],
             ["EstimateService", "GetAccessoryBookingFromEstimate"],
-            ["EstimateService", "GetInsuranceExtra"],
             ["EstimateService", "GetInsuranceExtraFromEstimate"],
             ["EstimateService", "GetAmountEstimate"],
             ["EstimateService", "GetWholeEstimate"]
