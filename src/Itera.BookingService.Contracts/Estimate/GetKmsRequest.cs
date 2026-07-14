@@ -1,9 +1,11 @@
+using Itera.BookingService.Contracts.Abstractions;
+
 namespace Itera.BookingService.Contracts.Estimate;
 
 /// <summary>
 /// Request per l'endpoint EstimateService.svc/GetKms.
 /// </summary>
-public sealed class GetKmsRequest
+public sealed class GetKmsRequest : ILegacyTokenCarrier
 {
     /// <summary>Token di autenticazione (validato da LegacyTokenEndpointFilter).</summary>
     public string? Token { get; set; }

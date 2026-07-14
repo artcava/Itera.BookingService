@@ -34,4 +34,9 @@ public interface IEstimateService
         GetAccessoryBookingRequest request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
+
+    Task<ApiResponse<List<InsuranceExtraDto>>> GetInsuranceExtraAsync(
+        GetInsuranceExtraRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken);
 }

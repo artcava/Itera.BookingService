@@ -1,7 +1,10 @@
+using Itera.BookingService.Contracts.Abstractions;
+
 namespace Itera.BookingService.Contracts.Estimate;
 
-public sealed record GetAccessoryBookingRequest
+public sealed record GetAccessoryBookingRequest : BaseRequest, ILegacyTokenCarrier
 {
+    public string? Token { get; set; }
     public short BrandId { get; init; }
     public int BranchId { get; init; }
     public int BranchDestinationId { get; init; }
@@ -11,5 +14,4 @@ public sealed record GetAccessoryBookingRequest
     public string DateTo { get; init; } = string.Empty;
     public string? CategoryId { get; init; }
     public string? SegmentCode { get; init; }
-    public string? Language { get; init; }
 }

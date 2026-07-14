@@ -14,11 +14,13 @@ public sealed class EstimateService(
     IValidator<GetProvinceRequest>          getProvinceValidator,
     IValidator<GetNationsRequest>           getNationsValidator,
     IValidator<GetAccessoryBookingRequest>  getAccessoryBookingValidator,
+    IValidator<GetInsuranceExtraRequest>    getInsuranceExtraValidator,
     IKmQueryService                         kmQueryService,
     IDurationService                        durationService,
     IProvinceQueryService                   provinceQueryService,
     INationQueryService                     nationQueryService,
     IEstimateAccessoryQueryService          estimateAccessoryQueryService,
+    IEstimateInsuranceQueryService          estimateInsuranceQueryService,
     ILogger<EstimateService>                logger) : IEstimateService
 {
     private const short BrandScnd = 2;
@@ -234,6 +236,48 @@ public sealed class EstimateService(
             authContext.WsUserId);
 
         return ApiResponse<List<AccessoryBookingDto>>.Ok(accessories);
+    }
+
+    // ------------------------------------------------------------------
+    // GetInsuranceExtra
+    // ------------------------------------------------------------------
+
+    public async Task<ApiResponse<List<InsuranceExtraDto>>> GetInsuranceExtraAsync(
+        GetInsuranceExtraRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken)
+    {
+        var validation = await getInsuranceExtraValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return new ApiResponse<List<InsuranceExtraDto>>
+            {
+                Esito = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio = validation.Errors.First().ErrorMessage,
+                Data = []
+            };
+        }
+
+        var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
+        var dateFrom = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateFrom, linguaId);
+        var dateTo = LegacyRequestCultureDateResolver.ResolveDateEndLegacy(request.DateTo, linguaId);
+
+        var insuranceExtras = await estimateInsuranceQueryService.GetInsuranceExtraAsync(
+            request.SegmentCode,
+            dateFrom,
+            dateTo,
+            request.RentalDays,
+            request.CatalogId,
+            cancellationToken);
+
+        logger.LogInformation(
+            "GetInsuranceExtra resolved {Count} insurance extras for SegmentCode {SegmentCode} WsUserID {WsUserId}",
+            insuranceExtras.Count,
+            request.SegmentCode,
+            authContext.WsUserId);
+
+        return ApiResponse<List<InsuranceExtraDto>>.Ok(insuranceExtras);
     }
 
     // ------------------------------------------------------------------
