@@ -15,12 +15,14 @@ public sealed class EstimateService(
     IValidator<GetNationsRequest>           getNationsValidator,
     IValidator<GetAccessoryBookingRequest>  getAccessoryBookingValidator,
     IValidator<GetInsuranceExtraRequest>    getInsuranceExtraValidator,
+    IValidator<GetAmountEstimateRequest>    getAmountEstimateValidator,
     IKmQueryService                         kmQueryService,
     IDurationService                        durationService,
     IProvinceQueryService                   provinceQueryService,
     INationQueryService                     nationQueryService,
     IEstimateAccessoryQueryService          estimateAccessoryQueryService,
     IEstimateInsuranceQueryService          estimateInsuranceQueryService,
+    IAmountEstimateParityService            amountEstimateParityService,
     ILogger<EstimateService>                logger) : IEstimateService
 {
     private const short BrandScnd = 2;
@@ -281,8 +283,27 @@ public sealed class EstimateService(
     }
 
     // ------------------------------------------------------------------
-    // Helpers privati
+    // GetAmountEstimate
     // ------------------------------------------------------------------
+
+    public async Task<ApiResponse<AmountEstimateDto>> GetAmountEstimateAsync(
+        GetAmountEstimateRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken)
+    {
+        var validation = await getAmountEstimateValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return new ApiResponse<AmountEstimateDto>
+            {
+                Esito = false,
+                CodiceErrore = "VALIDATION_ERROR",
+                Messaggio = validation.Errors.First().ErrorMessage
+            };
+        }
+
+        return await amountEstimateParityService.GetAmountEstimateAsync(request, authContext, cancellationToken);
+    }
 
     private static DateTime ParseDate(string value) =>
         DateTime.ParseExact(value, DateFormat,
@@ -319,4 +340,5 @@ public sealed class EstimateService(
 
         return lista;
     }
+
 }

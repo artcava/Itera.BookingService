@@ -39,4 +39,17 @@ public interface IEstimateService
         GetInsuranceExtraRequest request,
         LegacyAuthContext authContext,
         CancellationToken cancellationToken);
+
+    Task<ApiResponse<AmountEstimateDto>> GetAmountEstimateAsync(
+        GetAmountEstimateRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken);
+}
+
+public interface IAmountEstimateParityService
+{
+    Task<ApiResponse<AmountEstimateDto>> GetAmountEstimateAsync(
+        GetAmountEstimateRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken);
 }

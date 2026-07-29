@@ -14,7 +14,6 @@ public static class EstimateEndpoints
         "EstimateConfirmation",
         "GetAccessoryBookingFromEstimate",
         "GetInsuranceExtraFromEstimate",
-        "GetAmountEstimate",
         "GetWholeEstimate"
     ];
 
@@ -145,6 +144,23 @@ public static class EstimateEndpoints
             "Restituisce l'elenco degli extra assicurativi disponibili per filiale, categoria veicolo e finestra temporale. " +
             "Porting da WsPreventivoBL.GetInsuranceExtra.")
         .Produces<ApiResponse<List<InsuranceExtraDto>>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetAmountEstimate", async (
+            [FromBody] GetAmountEstimateRequest request,
+            HttpContext httpContext,
+            IEstimateService estimateService,
+            CancellationToken cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(await estimateService.GetAmountEstimateAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetAmountEstimate")
+        .WithSummary("Get amount estimate")
+        .WithDescription(
+            "Calcola gli importi del preventivo per segmento/km del token preventivo validando selezioni accessori e assicurazioni. " +
+            "Porting funzionale da WsPreventivoBL.GetAmountEstimate.")
+        .Produces<ApiResponse<AmountEstimateDto>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

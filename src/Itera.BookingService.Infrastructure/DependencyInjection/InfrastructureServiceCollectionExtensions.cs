@@ -64,6 +64,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<INationQueryService, NationQueryService>();
         services.AddScoped<IEstimateAccessoryQueryService, EstimateAccessoryQueryService>();
         services.AddScoped<IEstimateInsuranceQueryService, EstimateInsuranceQueryService>();
+        services.AddScoped<IEstimateAmountTokenQueryService, EstimateAmountTokenQueryService>();
 
         return services;
     }

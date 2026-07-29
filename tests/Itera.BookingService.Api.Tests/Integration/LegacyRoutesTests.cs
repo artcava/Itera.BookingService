@@ -74,7 +74,6 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
             ["EstimateService", "EstimateConfirmation"],
             ["EstimateService", "GetAccessoryBookingFromEstimate"],
             ["EstimateService", "GetInsuranceExtraFromEstimate"],
-            ["EstimateService", "GetAmountEstimate"],
             ["EstimateService", "GetWholeEstimate"]
         ];
     }
@@ -190,6 +189,162 @@ public class LegacyRoutesTests : IClassFixture<BookingApiFactory>
         Assert.True(first.TryGetProperty("codiceProvincia",      out var codice));
         Assert.True(first.TryGetProperty("descrizioneProvincia", out _));
         Assert.False(string.IsNullOrWhiteSpace(codice.GetString()));
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_Returns_Amounts_For_Valid_EstimateToken()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000001",
+            segmentCode = "ECO",
+            kmType = "S"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal("100.00", data.GetProperty("amounts").GetProperty("amount").GetString());
+        Assert.Equal("81.97", data.GetProperty("amounts").GetProperty("amountWithoutIVA").GetString());
+        Assert.Equal("120.00", data.GetProperty("amountsWithoutDiscount").GetProperty("amount").GetString());
+        Assert.Equal("98.36", data.GetProperty("amountsWithoutDiscount").GetProperty("amountWithoutIVA").GetString());
+
+        var discount = data.GetProperty("discount")[0];
+        Assert.Equal(-20.0m, discount.GetProperty("HDN_SCN").GetDecimal());
+        Assert.Equal("PROMO20", discount.GetProperty("HDN_SCN_KEY").GetString());
+        Assert.Equal(3, discount.GetProperty("discountTypeID").GetInt32());
+        Assert.Equal(777, discount.GetProperty("regolaDiVenditaID").GetInt32());
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_With_Invalid_DiscountCode_Returns_Legacy_DiscountCodeNotValid()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000001",
+            segmentCode = "ECO",
+            kmType = "S",
+            discountCode = "NOT-VALID"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.False(payload.GetProperty("esito").GetBoolean());
+        Assert.Equal("-324", payload.GetProperty("codiceErrore").GetString());
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_With_Valid_DiscountCode_Returns_Success()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000001",
+            segmentCode = "ECO",
+            kmType = "S",
+            discountCode = "PROMO20"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+        Assert.Equal("100.00", payload.GetProperty("data").GetProperty("amounts").GetProperty("amount").GetString());
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_With_Extra_Accessory_Recalculates_Amounts()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000001",
+            segmentCode = "ECO",
+            kmType = "S",
+            accessoryList = new[]
+            {
+                new { accessoryID = 11, quantity = 1 }
+            }
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal("112.20", data.GetProperty("amounts").GetProperty("amount").GetString());
+        Assert.Equal("91.97", data.GetProperty("amounts").GetProperty("amountWithoutIVA").GetString());
+        Assert.Equal("132.20", data.GetProperty("amountsWithoutDiscount").GetProperty("amount").GetString());
+        Assert.Equal("108.36", data.GetProperty("amountsWithoutDiscount").GetProperty("amountWithoutIVA").GetString());
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_With_InsuranceType_Recalculates_Amounts()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000001",
+            segmentCode = "ECO",
+            kmType = "S",
+            insuranceList = new[]
+            {
+                new { type = "SERENITY" }
+            }
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal("112.20", data.GetProperty("amounts").GetProperty("amount").GetString());
+        Assert.Equal("91.97", data.GetProperty("amounts").GetProperty("amountWithoutIVA").GetString());
+        Assert.Equal("132.20", data.GetProperty("amountsWithoutDiscount").GetProperty("amount").GetString());
+        Assert.Equal("108.36", data.GetProperty("amountsWithoutDiscount").GetProperty("amountWithoutIVA").GetString());
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_With_Legacy_Shape_ObjectEstimate_Returns_Amounts()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000002",
+            segmentCode = "ECO",
+            kmType = "S"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+
+        var data = payload.GetProperty("data");
+        Assert.Equal("100.00", data.GetProperty("amounts").GetProperty("amount").GetString());
+        Assert.Equal("81.97", data.GetProperty("amounts").GetProperty("amountWithoutIVA").GetString());
+        Assert.Equal("120.00", data.GetProperty("amountsWithoutDiscount").GetProperty("amount").GetString());
+        Assert.Equal("98.36", data.GetProperty("amountsWithoutDiscount").GetProperty("amountWithoutIVA").GetString());
+    }
+
+    [Fact]
+    public async Task GetAmountEstimate_With_Legacy_Shape_And_Valid_DiscountCode_Returns_Success()
+    {
+        var response = await _client.PostAsJsonAsync("/EstimateService.svc/GetAmountEstimate", new
+        {
+            estimateToken = "bbbbbbbb-0000-0000-0000-000000000002",
+            segmentCode = "ECO",
+            kmType = "S",
+            discountCode = "PROMO20"
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(payload.GetProperty("esito").GetBoolean());
+        Assert.Equal("100.00", payload.GetProperty("data").GetProperty("amounts").GetProperty("amount").GetString());
     }
 
     // -------------------------------------------------------------------------
