@@ -24,12 +24,18 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			services.RemoveAll<ISecurityService>();
 			services.RemoveAll<IVehicleQueryService>();
 			services.RemoveAll<IProvinceQueryService>();
+			services.RemoveAll<IEstimateAccessoryQueryService>();
+			services.RemoveAll<IEstimateInsuranceQueryService>();
+			services.RemoveAll<IEstimateAmountTokenQueryService>();
 
 			services.AddSingleton<ITokenValidationService, FakeTokenValidationService>();
 			services.AddSingleton<IBranchInfoQueryService, FakeBranchInfoQueryService>();
 			services.AddSingleton<ISecurityService, FakeSecurityService>();
 			services.AddSingleton<IVehicleQueryService, FakeVehicleQueryService>();
 			services.AddSingleton<IProvinceQueryService, FakeProvinceQueryService>();
+			services.AddSingleton<IEstimateAccessoryQueryService, FakeEstimateAccessoryQueryService>();
+			services.AddSingleton<IEstimateInsuranceQueryService, FakeEstimateInsuranceQueryService>();
+			services.AddSingleton<IEstimateAmountTokenQueryService, FakeEstimateAmountTokenQueryService>();
 		});
 	}
 
@@ -257,5 +263,195 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 
 		public Task<List<GetProvince>> GetProvinceAsync(CancellationToken ct = default)
 			=> Task.FromResult(Province);
+	}
+
+	private sealed class FakeEstimateAmountTokenQueryService : IEstimateAmountTokenQueryService
+	{
+		private const string ValidEstimateToken = "bbbbbbbb-0000-0000-0000-000000000001";
+		private const string LegacyShapeEstimateToken = "bbbbbbbb-0000-0000-0000-000000000002";
+
+		public Task<EstimateTokenValidationResult> ValidateEstimateTokenAsync(
+			string estimateToken,
+			int tokenValidPeriodSeconds,
+			CancellationToken cancellationToken)
+		{
+			if (!string.Equals(estimateToken, ValidEstimateToken, StringComparison.OrdinalIgnoreCase)
+				&& !string.Equals(estimateToken, LegacyShapeEstimateToken, StringComparison.OrdinalIgnoreCase))
+				return Task.FromResult(new EstimateTokenValidationResult(-3, null));
+
+			var objectDynParam = """
+			{
+			  "KmType": { "S": 1 },
+			  "StateSegment": { "ECO": "V" },
+			  "Accessory": { "ECO": [ 10 ] }
+			}
+			""";
+
+			var objectEstimate = string.Equals(estimateToken, LegacyShapeEstimateToken, StringComparison.OrdinalIgnoreCase)
+				? """
+				{
+				  "Segmenti": [
+				    {
+				      "CodiceSegmento": "ECO",
+				      "ImportiPreventivoSegmento": [
+				        {
+				          "KmTypeDescr": "S",
+				          "Importo": "100.00",
+				          "ImportoNoIva": "81.97",
+				          "ImportiSenzaSconto": {
+				            "Importo": "120.00",
+				            "ImportoNoIva": "98.36"
+				          },
+				          "CodiceSconto": [
+				            {
+				              "ValoreSconto": -20.0,
+				              "KeySconto": "PROMO20",
+				              "DiscountTypeID": 3,
+				              "DiscountTypeDescription": "PROMOWEB",
+				              "RegolaDiVenditaID": 777
+				            }
+				          ]
+				        }
+				      ]
+				    }
+				  ]
+				}
+				"""
+				: """
+			{
+			  "Segments": [
+			    {
+			      "CodeSegment": "ECO",
+			      "AmountSegmentEstimate": [
+			        {
+			          "KmType": "S",
+			          "Amount": "100.00",
+			          "AmountWithoutIVA": "81.97",
+			          "AmountsWithoutDiscount": {
+			            "Amount": "120.00",
+			            "AmountWithoutIVA": "98.36"
+			          },
+			          "DiscountList": [
+			            {
+			              "HDN_SCN": -20.0,
+			              "HDN_SCN_KEY": "PROMO20",
+			              "DiscountTypeID": 3,
+			              "DiscountTypeDescription": "PROMOWEB",
+			              "RegolaDiVenditaID": 777
+			            }
+			          ]
+			        }
+			      ]
+			    }
+			  ]
+			}
+			""";
+
+			var snapshot = new EstimateTokenSnapshot(
+				WsUserId: 123,
+				FilialeId: 10,
+				FilialeDestinazioneId: 10,
+				DataFromPreventivo: DateTime.Today,
+				DataToPreventivo: DateTime.Today.AddDays(1),
+				Giorni: 1,
+				ListinoId: 100,
+				CodiceDurata: "GG",
+				CodiceCategoria: "A",
+				ObjectDynParam: objectDynParam,
+				ObjectEstimate: objectEstimate,
+				VoucherCliente: null);
+
+			return Task.FromResult(new EstimateTokenValidationResult(0, snapshot));
+		}
+
+		public Task<bool> AcceptsNonSellableSegmentAsync(int wsUserId, CancellationToken cancellationToken)
+			=> Task.FromResult(false);
+
+		public Task<Dictionary<short, string>> GetAccessoryCodesByIdsAsync(
+			IReadOnlyCollection<short> accessoryIds,
+			CancellationToken cancellationToken)
+		{
+			var map = new Dictionary<short, string>();
+			foreach (var id in accessoryIds)
+				map[id] = "OTH";
+			return Task.FromResult(map);
+		}
+
+		public Task<List<EstimateInsuranceOption>> GetInsuranceOptionsAsync(
+			string segmentCode,
+			int rentalDays,
+			int catalogId,
+			DateTime dateFrom,
+			DateTime dateTo,
+			CancellationToken cancellationToken)
+		{
+			return Task.FromResult(new List<EstimateInsuranceOption>
+			{
+				new(1, "SERENITY")
+			});
+		}
+
+		public Task<short?> GetCurrentIvaIdAsync(CancellationToken cancellationToken)
+			=> Task.FromResult<short?>(22);
+
+		public Task<decimal?> GetCurrentIvaPercentageAsync(CancellationToken cancellationToken)
+			=> Task.FromResult<decimal?>(22m);
+	}
+
+	private sealed class FakeEstimateAccessoryQueryService : IEstimateAccessoryQueryService
+	{
+		public Task<List<AccessoryBookingDto>> GetAccessoryBookingAsync(
+			short brandId,
+			int branchId,
+			int branchDestinationId,
+			int catalogId,
+			int rentalDays,
+			DateTime dateFrom,
+			DateTime dateTo,
+			string? categoryId,
+			string? segmentCode,
+			CancellationToken cancellationToken)
+		{
+			return Task.FromResult(new List<AccessoryBookingDto>
+			{
+				new()
+				{
+					AccessoryId = 10,
+					Code = "OTH",
+					Amount = 0m,
+					AmountVat = 0m
+				},
+				new()
+				{
+					AccessoryId = 11,
+					Code = "OTH",
+					Amount = 10m,
+					AmountVat = 12.2m
+				}
+			});
+		}
+	}
+
+	private sealed class FakeEstimateInsuranceQueryService : IEstimateInsuranceQueryService
+	{
+		public Task<List<InsuranceExtraDto>> GetInsuranceExtraAsync(
+			string segmentCode,
+			DateTime dateFrom,
+			DateTime dateTo,
+			int rentalDays,
+			int catalogId,
+			CancellationToken cancellationToken)
+		{
+			return Task.FromResult(new List<InsuranceExtraDto>
+			{
+				new()
+				{
+					InsuranceExtraID = 1,
+					InsuranceExtra = "SERENITY",
+					InsuranceExtraDescr = "Copertura Serenity",
+					InsuranceExtraWithoutIVA = "10.00"
+				}
+			});
+		}
 	}
 }

@@ -28,6 +28,7 @@ public static class ApplicationServiceCollectionExtensions
 
         // Estimate
         services.AddScoped<IDurationService, DurationService>();
+        services.AddScoped<IAmountEstimateParityService, AmountEstimateParityService>();
         services.AddScoped<IEstimateService, EstimateService>();
 
         return services;
