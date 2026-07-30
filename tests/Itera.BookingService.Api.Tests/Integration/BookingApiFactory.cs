@@ -1,5 +1,4 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Contracts.General;
@@ -20,22 +19,18 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 		builder.ConfigureServices(services =>
 		{
 			services.RemoveAll<ITokenValidationService>();
-			services.RemoveAll<IBranchInfoQueryService>();
+			services.RemoveAll<IBranchQueryService>();
 			services.RemoveAll<ISecurityService>();
 			services.RemoveAll<IVehicleQueryService>();
 			services.RemoveAll<IProvinceQueryService>();
-			services.RemoveAll<IEstimateAccessoryQueryService>();
-			services.RemoveAll<IEstimateInsuranceQueryService>();
-			services.RemoveAll<IEstimateAmountTokenQueryService>();
+			services.RemoveAll<IEstimateQueryService>();
 
 			services.AddSingleton<ITokenValidationService, FakeTokenValidationService>();
-			services.AddSingleton<IBranchInfoQueryService, FakeBranchInfoQueryService>();
+			services.AddSingleton<IBranchQueryService, FakeBranchInfoQueryService>();
 			services.AddSingleton<ISecurityService, FakeSecurityService>();
 			services.AddSingleton<IVehicleQueryService, FakeVehicleQueryService>();
 			services.AddSingleton<IProvinceQueryService, FakeProvinceQueryService>();
-			services.AddSingleton<IEstimateAccessoryQueryService, FakeEstimateAccessoryQueryService>();
-			services.AddSingleton<IEstimateInsuranceQueryService, FakeEstimateInsuranceQueryService>();
-			services.AddSingleton<IEstimateAmountTokenQueryService, FakeEstimateAmountTokenQueryService>();
+			services.AddSingleton<IEstimateQueryService, FakeEstimateQueryService>();
 		});
 	}
 
@@ -135,7 +130,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 		}
 	}
 
-	private sealed class FakeBranchInfoQueryService : IBranchInfoQueryService
+	private sealed class FakeBranchInfoQueryService : IBranchQueryService
 	{
 		public Task<List<FilialeDto>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
 		{
@@ -265,7 +260,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 			=> Task.FromResult(Province);
 	}
 
-	private sealed class FakeEstimateAmountTokenQueryService : IEstimateAmountTokenQueryService
+	private sealed class FakeEstimateQueryService : IEstimateQueryService
 	{
 		private const string ValidEstimateToken = "bbbbbbbb-0000-0000-0000-000000000001";
 		private const string LegacyShapeEstimateToken = "bbbbbbbb-0000-0000-0000-000000000002";
@@ -396,10 +391,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 
 		public Task<decimal?> GetCurrentIvaPercentageAsync(CancellationToken cancellationToken)
 			=> Task.FromResult<decimal?>(22m);
-	}
 
-	private sealed class FakeEstimateAccessoryQueryService : IEstimateAccessoryQueryService
-	{
 		public Task<List<AccessoryBookingDto>> GetAccessoryBookingAsync(
 			short brandId,
 			int branchId,
@@ -430,10 +422,7 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				}
 			});
 		}
-	}
 
-	private sealed class FakeEstimateInsuranceQueryService : IEstimateInsuranceQueryService
-	{
 		public Task<List<InsuranceExtraDto>> GetInsuranceExtraAsync(
 			string segmentCode,
 			DateTime dateFrom,
@@ -453,5 +442,10 @@ public sealed class BookingApiFactory : WebApplicationFactory<IApiMarker>
 				}
 			});
 		}
-	}
+
+        public Task<EstimateDto> GetWholeEstimateAsync(short brandId, string estimateToken, string? segmentCode, string? KmType, IReadOnlyCollection<int>? InsuranceExtraList, IReadOnlyCollection<InsuranceRequest>? InsuranceList, IReadOnlyCollection<AccessoryRequest>? AccessoryList, string? BookingCode, bool Prepaid, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

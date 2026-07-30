@@ -1,7 +1,7 @@
 using FluentValidation;
 using Itera.BookingService.Contracts.Vehicle;
 
-namespace Itera.BookingService.Application.Vehicle;
+namespace Itera.BookingService.Application.Vehicle.Validators;
 
 public sealed class GetMezziRequestValidator : AbstractValidator<GetMezziRequest>
 {

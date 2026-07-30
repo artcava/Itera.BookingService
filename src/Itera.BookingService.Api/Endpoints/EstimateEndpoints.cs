@@ -13,8 +13,7 @@ public static class EstimateEndpoints
         "GetEstimate",
         "EstimateConfirmation",
         "GetAccessoryBookingFromEstimate",
-        "GetInsuranceExtraFromEstimate",
-        "GetWholeEstimate"
+        "GetInsuranceExtraFromEstimate"
     ];
 
     public static IEndpointRouteBuilder MapEstimateEndpoints(
@@ -161,6 +160,23 @@ public static class EstimateEndpoints
             "Calcola gli importi del preventivo per segmento/km del token preventivo validando selezioni accessori e assicurazioni. " +
             "Porting funzionale da WsPreventivoBL.GetAmountEstimate.")
         .Produces<ApiResponse<AmountEstimateDto>>(StatusCodes.Status200OK)
+        .RequireLegacyToken();
+
+        group.MapPost("/GetWholeEstimate", async (
+            [FromBody] GetWholeEstimateRequest request,
+            HttpContext httpContext,
+            IEstimateService estimateService,
+            CancellationToken cancellationToken) =>
+        {
+            var authContext = (LegacyAuthContext)httpContext.Items[LegacyAuthContext.ItemKey]!;
+            return Results.Json(await estimateService.GetWholeEstimateAsync(request, authContext, cancellationToken));
+        })
+        .WithName("EstimateService_GetWholeEstimate")
+        .WithSummary("Get whole estimate")
+        .WithDescription(
+            "Calcola il preventivo completo per segmento/km del token preventivo validando selezioni accessori e assicurazioni. " +
+            "Porting funzionale da WsPreventivoBL.GetWholeEstimate.")
+        .Produces<ApiResponse<EstimateDto>>(StatusCodes.Status200OK)
         .RequireLegacyToken();
 
         // --- Stub NOT_IMPLEMENTED (da migrare) ---

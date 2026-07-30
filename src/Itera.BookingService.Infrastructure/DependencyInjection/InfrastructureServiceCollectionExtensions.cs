@@ -49,8 +49,12 @@ public static class InfrastructureServiceCollectionExtensions
             // Intentional: no migrations pipeline here. The existing DB schema is authoritative.
         });
 
+
+        // Auth
         services.AddScoped<ITokenValidationService, LegacyTokenValidationService>();
-        services.AddScoped<IBranchInfoQueryService, LegacyBranchInfoQueryService>();
+
+        // Branch
+        services.AddScoped<IBranchQueryService, BranchQueryService>();
 
         // Security
         services.AddScoped<ISecurityQueryService, SecurityQueryService>();
@@ -62,9 +66,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IKmQueryService, KmQueryService>();
         services.AddScoped<IProvinceQueryService, ProvinceQueryService>();
         services.AddScoped<INationQueryService, NationQueryService>();
-        services.AddScoped<IEstimateAccessoryQueryService, EstimateAccessoryQueryService>();
-        services.AddScoped<IEstimateInsuranceQueryService, EstimateInsuranceQueryService>();
-        services.AddScoped<IEstimateAmountTokenQueryService, EstimateAmountTokenQueryService>();
+        services.AddScoped<IEstimateQueryService, EstimateQueryService>();
 
         return services;
     }

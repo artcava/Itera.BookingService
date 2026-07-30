@@ -11,7 +11,7 @@ using EfFilialeRiposoSettimanale = Itera.BookingService.Infrastructure.Persisten
 
 namespace Itera.BookingService.Infrastructure.Branch;
 
-public sealed class LegacyBranchInfoQueryService(LegacyDbContext dbContext) : IBranchInfoQueryService
+public sealed class BranchQueryService(LegacyDbContext dbContext) : IBranchQueryService
 {
     public async Task<List<FilialeDto>> GetAllBranchesAsync(short brandId, bool getExtraData, bool getFilialiExtra, byte languageId, DateTime selectedDate, CancellationToken cancellationToken)
     {

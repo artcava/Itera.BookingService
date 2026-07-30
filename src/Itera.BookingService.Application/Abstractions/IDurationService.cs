@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Application.Estimate.Abstractions;
+namespace Itera.BookingService.Application.Abstractions;
 
 /// <summary>
 /// Calcola durata e giorni a partire da dataFrom/dataTo,

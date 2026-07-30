@@ -1,5 +1,6 @@
 using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Helpers;
 using Itera.BookingService.Contracts.General;
 using Itera.BookingService.Contracts.Vehicle;
 using Microsoft.Extensions.Logging;
@@ -19,13 +20,7 @@ public sealed class VehicleService(
         var validation = await validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
         {
-            return new ApiResponse<List<MezzoSegmento>>
-            {
-                Esito = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio = validation.Errors.First().ErrorMessage,
-                Data = []
-            };
+            return ResponseHelper.LegacyError<List<MezzoSegmento>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
         }
 
         var result = await vehicleQueryService.GetMezziAsync(

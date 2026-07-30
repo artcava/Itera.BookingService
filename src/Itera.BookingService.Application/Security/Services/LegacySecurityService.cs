@@ -1,4 +1,6 @@
 using FluentValidation;
+using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Helpers;
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Contracts.General;
 using Itera.BookingService.Contracts.Options;
@@ -36,26 +38,14 @@ public sealed class LegacySecurityService : ISecurityService
         if (!validation.IsValid)
         {
             _logger.LogWarning("GetToken validazione fallita Username={Username}", request.Username);
-            return new ApiResponse<AuthTokenData>
-            {
-                Esito = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio = string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)),
-                Data = null
-            };
+            return ResponseHelper.LegacyError<AuthTokenData>("VALIDATION_ERROR", string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)));
         }
 
         var user = await _query.ValidateUserAsync(request.Username, request.Password, ct);
         if (user is null)
         {
             _logger.LogWarning("GetToken credenziali non valide Username={Username}", request.Username);
-            return new ApiResponse<AuthTokenData>
-            {
-                Esito = false,
-                CodiceErrore = "INVALID_LOGIN",
-                Messaggio = "Username o password non validi.",
-                Data = new AuthTokenData(null)
-            };
+            return ResponseHelper.LegacyError<AuthTokenData>("INVALID_LOGIN", "Username o password non validi.");
         }
 
         var token = await _query.CheckOrCreateTokenAsync(
@@ -64,13 +54,7 @@ public sealed class LegacySecurityService : ISecurityService
         if (token is null)
         {
             _logger.LogError("GetToken generazione token fallita WsUserID={WsUserID}", user.Value.WsUserID);
-            return new ApiResponse<AuthTokenData>
-            {
-                Esito = false,
-                CodiceErrore = "TOKEN_GENERATION_ERROR",
-                Messaggio = "Impossibile generare un token nuovo.",
-                Data = new AuthTokenData(null)
-            };
+            return ResponseHelper.LegacyError<AuthTokenData>("TOKEN_GENERATION_ERROR", "Impossibile generare un token nuovo.");
         }
 
         _logger.LogInformation("GetToken completato WsUserID={WsUserID} BrandID={BrandID}",
@@ -84,12 +68,7 @@ public sealed class LegacySecurityService : ISecurityService
     {
         var validation = await _validateTokenValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new ApiResponse<object?>
-            {
-                Esito = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio = string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))
-            };
+            return ResponseHelper.LegacyError<object?>("VALIDATION_ERROR", string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)));
 
         var tokenGuid = Guid.Parse(request.Token);
         var brandId = await _query.ValidateTokenAsync(tokenGuid, _authOptions.TokenValidPeriodHours, ct);
@@ -97,12 +76,8 @@ public sealed class LegacySecurityService : ISecurityService
         if (brandId is null)
         {
             _logger.LogWarning("ValidateToken non valido o scaduto Token={Token}", request.Token);
-            return new ApiResponse<object?>
-            {
-                Esito = false,
-                CodiceErrore = "INVALID_TOKEN",
-                Messaggio = "Token scaduto o non valido."
-            };
+            
+            return ResponseHelper.LegacyError<object?>("INVALID_TOKEN", "Token scaduto o non valido.");
         }
 
         return ApiResponse<object?>.Ok(null);

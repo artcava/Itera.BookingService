@@ -2,7 +2,7 @@ using Itera.BookingService.Contracts.Estimate;
 
 namespace Itera.BookingService.Application.Abstractions;
 
-public interface IEstimateInsuranceQueryService
+public interface IEstimateQueryService
 {
     Task<List<InsuranceExtraDto>> GetInsuranceExtraAsync(
         string segmentCode,
@@ -11,10 +11,6 @@ public interface IEstimateInsuranceQueryService
         int rentalDays,
         int catalogId,
         CancellationToken cancellationToken);
-}
-
-public interface IEstimateAmountTokenQueryService
-{
     Task<EstimateTokenValidationResult> ValidateEstimateTokenAsync(
         string estimateToken,
         int tokenValidPeriodSeconds,
@@ -39,8 +35,31 @@ public interface IEstimateAmountTokenQueryService
     Task<short?> GetCurrentIvaIdAsync(CancellationToken cancellationToken);
 
     Task<decimal?> GetCurrentIvaPercentageAsync(CancellationToken cancellationToken);
-}
 
+    Task<List<AccessoryBookingDto>> GetAccessoryBookingAsync(
+        short brandId,
+        int branchId,
+        int branchDestinationId,
+        int catalogId,
+        int rentalDays,
+        DateTime dateFrom,
+        DateTime dateTo,
+        string? categoryId,
+        string? segmentCode,
+        CancellationToken cancellationToken);
+
+    Task<EstimateDto> GetWholeEstimateAsync(
+        short brandId,
+        string estimateToken,
+        string? segmentCode,
+        string? KmType,
+        IReadOnlyCollection<int>? InsuranceExtraList,
+        IReadOnlyCollection<InsuranceRequest>? InsuranceList,
+        IReadOnlyCollection<AccessoryRequest>? AccessoryList,
+        string? BookingCode,
+        bool Prepaid,
+        CancellationToken cancellationToken);
+}
 public sealed record EstimateTokenValidationResult(
     int ValidationCode,
     EstimateTokenSnapshot? Snapshot);

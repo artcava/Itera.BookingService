@@ -9,7 +9,7 @@ namespace Itera.BookingService.Application.Branch;
 public sealed class BranchService(
     IValidator<GetAllBranchesRequest> allBranchesValidator,
     IValidator<GetBranchInfoRequest> infoBranchValidator,
-    IBranchInfoQueryService branchInfoQueryService,
+    IBranchQueryService branchQueryService,
     ILogger<BranchService> logger) : IBranchService
 {
     public async Task<ApiResponse<List<FilialeDto>>> GetAllBranchesAsync(GetAllBranchesRequest request, LegacyAuthContext authContext, CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ public sealed class BranchService(
         var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
         var selectedDate = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateStart, linguaId);
 
-        var branches = await branchInfoQueryService.GetAllBranchesAsync(
+        var branches = await branchQueryService.GetAllBranchesAsync(
             authContext.BrandId,
             request.GetExtraData,
             request.GetFilialiExtra ?? false,
@@ -58,7 +58,7 @@ public sealed class BranchService(
         var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
         var selectedDate = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateStart, linguaId);
 
-        var result = await branchInfoQueryService.GetInfoBranchAsync(
+        var result = await branchQueryService.GetInfoBranchAsync(
             authContext.BrandId,
             request.BranchID,
             request.GetFilialiExtra ?? false,

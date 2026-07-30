@@ -2,7 +2,6 @@ using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Branch;
 using Itera.BookingService.Application.Estimate;
-using Itera.BookingService.Application.Estimate.Abstractions;
 using Itera.BookingService.Application.Security.Services;
 using Itera.BookingService.Application.Vehicle;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +27,7 @@ public static class ApplicationServiceCollectionExtensions
 
         // Estimate
         services.AddScoped<IDurationService, DurationService>();
-        services.AddScoped<IAmountEstimateParityService, AmountEstimateParityService>();
+        services.AddScoped<IAmountEstimateService, AmountEstimateService>();
         services.AddScoped<IEstimateService, EstimateService>();
 
         return services;
