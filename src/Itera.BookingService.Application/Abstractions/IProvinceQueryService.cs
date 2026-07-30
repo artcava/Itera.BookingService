@@ -1,6 +1,6 @@
 using Itera.BookingService.Contracts.Estimate;
 
-namespace Itera.BookingService.Application.Estimate.Abstractions;
+namespace Itera.BookingService.Application.Abstractions;
 
 public interface IProvinceQueryService
 {

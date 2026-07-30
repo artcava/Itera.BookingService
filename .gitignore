@@ -21,6 +21,8 @@ frontend/node_modules/
 frontend/.pnpm-store/
 frontend/pnpm-store/
 
+docs/Legacy/
+
 *.lscache
 
 # Local developer settings — never commit

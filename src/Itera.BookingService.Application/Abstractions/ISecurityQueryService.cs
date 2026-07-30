@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Application.Security;
+namespace Itera.BookingService.Application.Abstractions;
 
 public interface ISecurityQueryService
 {

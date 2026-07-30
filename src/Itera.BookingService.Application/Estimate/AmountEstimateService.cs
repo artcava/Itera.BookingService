@@ -1,5 +1,5 @@
 using Itera.BookingService.Application.Abstractions;
-using Itera.BookingService.Application.Estimate.Abstractions;
+using Itera.BookingService.Application.Helpers;
 using Itera.BookingService.Contracts.Estimate;
 using Itera.BookingService.Contracts.General;
 using Microsoft.Extensions.Logging;
@@ -8,11 +8,9 @@ using System.Text.Json;
 
 namespace Itera.BookingService.Application.Estimate;
 
-public sealed class AmountEstimateParityService(
-    IEstimateAccessoryQueryService estimateAccessoryQueryService,
-    IEstimateInsuranceQueryService estimateInsuranceQueryService,
-    IEstimateAmountTokenQueryService estimateAmountTokenQueryService,
-    ILogger<AmountEstimateParityService> logger) : IAmountEstimateParityService
+public sealed class AmountEstimateService(
+    IEstimateQueryService estimateQueryService,
+    ILogger<AmountEstimateService> logger) : IAmountEstimateService
 {
     public async Task<ApiResponse<AmountEstimateDto>> GetAmountEstimateAsync(
         GetAmountEstimateRequest request,
@@ -20,7 +18,7 @@ public sealed class AmountEstimateParityService(
         CancellationToken cancellationToken)
     {
         // Legacy fallback from WsValidate.ValidateEstimateToken: 300 seconds when config is missing.
-        var estimateTokenValidation = await estimateAmountTokenQueryService.ValidateEstimateTokenAsync(
+        var estimateTokenValidation = await estimateQueryService.ValidateEstimateTokenAsync(
             request.EstimateToken,
             tokenValidPeriodSeconds: 300,
             cancellationToken);
@@ -29,36 +27,36 @@ public sealed class AmountEstimateParityService(
         {
             return estimateTokenValidation.ValidationCode switch
             {
-                -1 => LegacyError<AmountEstimateDto>(-312, "Estimate token already in use"),
-                -2 => LegacyError<AmountEstimateDto>(-101, "Estimate token has expired"),
-                _ => LegacyError<AmountEstimateDto>(-309, "An error occurred while retrieving the estimate")
+                -1 => ResponseHelper.LegacyError<AmountEstimateDto>(-312, "Estimate token already in use"),
+                -2 => ResponseHelper.LegacyError<AmountEstimateDto>(-101, "Estimate token has expired"),
+                _ => ResponseHelper.LegacyError<AmountEstimateDto>(-309, "An error occurred while retrieving the estimate")
             };
         }
 
         var snapshot = estimateTokenValidation.Snapshot;
         if (snapshot is null)
-            return LegacyError<AmountEstimateDto>(-309, "An error occurred while retrieving the estimate");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-309, "An error occurred while retrieving the estimate");
 
         var dyn = TryDeserializeObjectDynParam(snapshot.ObjectDynParam);
         if (dyn?.StateSegment is null || dyn.KmType is null)
-            return LegacyError<AmountEstimateDto>(-309, "An error occurred while retrieving the estimate");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-309, "An error occurred while retrieving the estimate");
 
         if (!dyn.StateSegment.TryGetValue(request.SegmentCode, out var segmentState))
-            return LegacyError<AmountEstimateDto>(-236, "Unable to retrieve segment information");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-236, "Unable to retrieve segment information");
 
-        var acceptsNonSellable = await estimateAmountTokenQueryService.AcceptsNonSellableSegmentAsync(
+        var acceptsNonSellable = await estimateQueryService.AcceptsNonSellableSegmentAsync(
             authContext.WsUserId,
             cancellationToken);
 
         if (string.Equals(segmentState, "N", StringComparison.OrdinalIgnoreCase) && !acceptsNonSellable)
-            return LegacyError<AmountEstimateDto>(-236, "Unable to retrieve segment information");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-236, "Unable to retrieve segment information");
 
         if (!dyn.KmType.TryGetValue(request.KmType, out var kmId) || kmId == 0)
-            return LegacyError<AmountEstimateDto>(-310, "Unable to retrieve km information");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-310, "Unable to retrieve km information");
 
-        var ivaId = await estimateAmountTokenQueryService.GetCurrentIvaIdAsync(cancellationToken);
+        var ivaId = await estimateQueryService.GetCurrentIvaIdAsync(cancellationToken);
         if (!ivaId.HasValue || ivaId.Value <= 0)
-            return LegacyError<AmountEstimateDto>(-313, "Unable to retrieve VAT information");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-313, "Unable to retrieve VAT information");
 
         var insuranceList = request.InsuranceList;
         var insuranceExtraList = request.InsuranceExtraList;
@@ -66,9 +64,9 @@ public sealed class AmountEstimateParityService(
             || (insuranceList is not null && insuranceList.Count > 0))
         {
             if (!snapshot.Giorni.HasValue || !snapshot.ListinoId.HasValue)
-                return LegacyError<AmountEstimateDto>(-323, "Unable to retrieve insurance list");
+                return ResponseHelper.LegacyError<AmountEstimateDto>(-323, "Unable to retrieve insurance list");
 
-            var insuranceOptions = await estimateAmountTokenQueryService.GetInsuranceOptionsAsync(
+            var insuranceOptions = await estimateQueryService.GetInsuranceOptionsAsync(
                 request.SegmentCode,
                 snapshot.Giorni.Value,
                 snapshot.ListinoId.Value,
@@ -81,7 +79,7 @@ public sealed class AmountEstimateParityService(
                 var selectedIds = insuranceExtraList.ToHashSet();
                 var availableIds = insuranceOptions.Select(i => i.ListinoFranchigiaId).ToHashSet();
                 if (!selectedIds.IsSubsetOf(availableIds))
-                    return LegacyError<AmountEstimateDto>(-323, "Unable to retrieve insurance list");
+                    return ResponseHelper.LegacyError<AmountEstimateDto>(-323, "Unable to retrieve insurance list");
             }
 
             if (insuranceList is not null && insuranceList.Count > 0)
@@ -92,7 +90,7 @@ public sealed class AmountEstimateParityService(
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
                 if (string.IsNullOrWhiteSpace(selectedType) || !availableTypes.Contains(selectedType))
-                    return LegacyError<AmountEstimateDto>(-323, "Unable to retrieve insurance list");
+                    return ResponseHelper.LegacyError<AmountEstimateDto>(-323, "Unable to retrieve insurance list");
             }
         }
 
@@ -106,38 +104,38 @@ public sealed class AmountEstimateParityService(
         {
             accessoryList.RemoveAll(x => includedAccessories.Contains(x.AccessoryID));
             foreach (var accessoryId in includedAccessories)
-                accessoryList.Add(new AmountEstimateAccessoryRequest { AccessoryID = accessoryId, Quantity = 1 });
+                accessoryList.Add(new AccessoryRequest { AccessoryID = accessoryId, Quantity = 1 });
         }
 
         if (accessoryList.Count > 0)
         {
             var requestedAccessoryIds = accessoryList.Select(x => x.AccessoryID).ToList();
-            var accessoryCodes = await estimateAmountTokenQueryService.GetAccessoryCodesByIdsAsync(
+            var accessoryCodes = await estimateQueryService.GetAccessoryCodesByIdsAsync(
                 requestedAccessoryIds,
                 cancellationToken);
 
             if (requestedAccessoryIds.Count != accessoryCodes.Count)
-                return LegacyError<AmountEstimateDto>(-325, "Unable to retrieve accessories");
+                return ResponseHelper.LegacyError<AmountEstimateDto>(-325, "Unable to retrieve accessories");
 
             foreach (var accessory in accessoryList)
             {
                 if (!accessoryCodes.TryGetValue(accessory.AccessoryID, out var code))
-                    return LegacyError<AmountEstimateDto>(-325, "Unable to retrieve accessories");
+                    return ResponseHelper.LegacyError<AmountEstimateDto>(-325, "Unable to retrieve accessories");
 
                 var maxQuantity = GetAccessoryMaxQuantity(code);
                 if (accessory.Quantity > maxQuantity)
-                    return LegacyError<AmountEstimateDto>(-326, $"Errore quantità max accessorio({code}) superata");
+                    return ResponseHelper.LegacyError<AmountEstimateDto>(-326, $"Errore quantità max accessorio({code}) superata");
             }
         }
 
         var parsedAmount = TryExtractAmountEstimate(snapshot.ObjectEstimate, request.SegmentCode, request.KmType);
         if (parsedAmount is null)
-            return LegacyError<AmountEstimateDto>(-321, "Unable to retrieve rates");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-321, "Unable to retrieve rates");
 
         if (!string.IsNullOrWhiteSpace(request.DiscountCode)
             && !ValidateRequestedDiscountCode(request.DiscountCode!, snapshot.VoucherCliente, parsedAmount.Discount, out var discountValidationMessage))
         {
-            return LegacyError<AmountEstimateDto>(-324, discountValidationMessage ?? "Discount code not valid");
+            return ResponseHelper.LegacyError<AmountEstimateDto>(-324, discountValidationMessage ?? "Discount code not valid");
         }
 
         var hasExplicitAccessoryRequest = request.AccessoryList is { Count: > 0 };
@@ -152,9 +150,9 @@ public sealed class AmountEstimateParityService(
         }
         else
         {
-            var ivaPercentage = await estimateAmountTokenQueryService.GetCurrentIvaPercentageAsync(cancellationToken);
+            var ivaPercentage = await estimateQueryService.GetCurrentIvaPercentageAsync(cancellationToken);
             if (!ivaPercentage.HasValue)
-                return LegacyError<AmountEstimateDto>(-313, "Unable to retrieve VAT information");
+                return ResponseHelper.LegacyError<AmountEstimateDto>(-313, "Unable to retrieve VAT information");
 
             decimal insuranceVatMultiplier = 1m + (ivaPercentage.Value / 100m);
 
@@ -169,10 +167,10 @@ public sealed class AmountEstimateParityService(
                     || !snapshot.Giorni.HasValue
                     || !snapshot.ListinoId.HasValue)
                 {
-                    return LegacyError<AmountEstimateDto>(-321, "Unable to retrieve rates");
+                    return ResponseHelper.LegacyError<AmountEstimateDto>(-321, "Unable to retrieve rates");
                 }
 
-                var accessoryPricing = await estimateAccessoryQueryService.GetAccessoryBookingAsync(
+                var accessoryPricing = await estimateQueryService.GetAccessoryBookingAsync(
                     authContext.BrandId,
                     snapshot.FilialeId,
                     snapshot.FilialeDestinazioneId,
@@ -205,7 +203,7 @@ public sealed class AmountEstimateParityService(
                 foreach (var req in accessoryList)
                 {
                     if (!accessoryPricingMap.TryGetValue(req.AccessoryID, out var p))
-                        return LegacyError<AmountEstimateDto>(-325, "Unable to retrieve accessories");
+                        return ResponseHelper.LegacyError<AmountEstimateDto>(-325, "Unable to retrieve accessories");
 
                     accessoryNewVat += p.AmountVat * req.Quantity;
                     accessoryNewNet += p.Amount * req.Quantity;
@@ -220,9 +218,9 @@ public sealed class AmountEstimateParityService(
             if (hasExplicitInsuranceRequest)
             {
                 if (!snapshot.Giorni.HasValue || !snapshot.ListinoId.HasValue)
-                    return LegacyError<AmountEstimateDto>(-321, "Unable to retrieve rates");
+                    return ResponseHelper.LegacyError<AmountEstimateDto>(-321, "Unable to retrieve rates");
 
-                var insurancePricing = await estimateInsuranceQueryService.GetInsuranceExtraAsync(
+                var insurancePricing = await estimateQueryService.GetInsuranceExtraAsync(
                     request.SegmentCode,
                     snapshot.DataFromPreventivo,
                     snapshot.DataToPreventivo,
@@ -307,17 +305,6 @@ public sealed class AmountEstimateParityService(
             request.KmType);
 
         return ApiResponse<AmountEstimateDto>.Ok(amountResult);
-    }
-
-    private static ApiResponse<T> LegacyError<T>(int errorCode, string message)
-    {
-        return new ApiResponse<T>
-        {
-            Esito = false,
-            CodiceErrore = errorCode.ToString(),
-            Messaggio = message,
-            Data = default
-        };
     }
 
     private static short GetAccessoryMaxQuantity(string accessoryCode)

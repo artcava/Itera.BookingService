@@ -1,4 +1,4 @@
-namespace Itera.BookingService.Application.Estimate.Helpers;
+namespace Itera.BookingService.Application.Helpers;
 
 /// <summary>
 /// Funzioni pure per il calcolo della durata.
@@ -19,6 +19,15 @@ public static class DurationHelper
     public const string DbCodiceMese       = "Mese";
     public const string DbCodicePlurimensile = "Plurimensile";
     public const string DbCodiceGiorni2    = "Giorni2";
+
+    // Soglia giorni per weekend singolo vs weekend esteso (3 giorni)
+    public const int GiorniWeekend      = 2;
+    public const int GiorniWeekend3g    = 3;
+    // Soglia in ore oltre la quale si applica la tolleranza H24
+    public const int TolleranzaOre      = 2;
+    // Soglia giorni per passare a mensile (28 giorni = 4 settimane)
+    public const int SogliaMese         = 28;
+    public const int HoursInDay         = 24;
 
     /// <summary>
     /// Calcola il codice colonna <c>ListinoGiorni.Codice</c> a partire dal codice durata e

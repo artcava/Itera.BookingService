@@ -1,4 +1,4 @@
-using Itera.BookingService.Application.Security;
+using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Infrastructure.Persistence;
 using Itera.BookingService.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;

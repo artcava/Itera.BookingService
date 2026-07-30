@@ -1,7 +1,7 @@
 using Itera.BookingService.Application.Security.Dtos;
 using Itera.BookingService.Contracts.General;
 
-namespace Itera.BookingService.Application.Security.Services;
+namespace Itera.BookingService.Application.Abstractions;
 
 public interface ISecurityService
 {

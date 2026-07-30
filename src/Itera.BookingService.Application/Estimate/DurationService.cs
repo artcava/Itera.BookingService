@@ -1,5 +1,5 @@
-using Itera.BookingService.Application.Estimate.Abstractions;
-using Itera.BookingService.Application.Estimate.Helpers;
+using Itera.BookingService.Application.Abstractions;
+using Itera.BookingService.Application.Helpers;
 
 namespace Itera.BookingService.Application.Estimate;
 
@@ -9,31 +9,21 @@ namespace Itera.BookingService.Application.Estimate;
 /// </summary>
 public sealed class DurationService : IDurationService
 {
-    // Soglia in ore oltre la quale si applica la tolleranza H24
-    private const int TolleranzaOre = 2;
-
-    // Soglia giorni per weekend singolo vs weekend esteso (3 giorni)
-    private const int GiorniWeekend     = 2;
-    private const int GiorniWeekend3g   = 3;
-
-    // Soglia giorni per passare a mensile (28 giorni = 4 settimane)
-    private const int SogliaMese        = 28;
-
     public DurationResult Calcola(DateTime dataFrom, DateTime dataTo, bool venditaGiornoSingoloSuWeekend = true)
     {
         // Calcolo giorni con logica H24 + tolleranza: ogni 24h complete = 1 giorno,
         // se il residuo supera TolleranzaOre si aggiunge un giorno extra.
         var diff    = dataTo - dataFrom;
-        var giorni  = (int)diff.TotalHours / 24;
-        var residuo = (int)diff.TotalHours % 24;
+        var giorni  = (int)diff.TotalHours / DurationHelper.HoursInDay;
+        var residuo = (int)diff.TotalHours % DurationHelper.HoursInDay;
 
-        if (residuo > TolleranzaOre)
+        if (residuo > DurationHelper.TolleranzaOre)
             giorni++;
 
         giorni = Math.Max(1, giorni);
 
         // Determinazione codice durata
-        if (giorni >= SogliaMese)
+        if (giorni >= DurationHelper.SogliaMese)
         {
             // Tronca la finestra a esattamente un mese (stesso giorno del mese successivo).
             // NewDataTo segnala al chiamante il "PeriodoSuperioreAlMese".
@@ -42,14 +32,14 @@ public sealed class DurationService : IDurationService
             return new DurationResult(DurationHelper.CodicePlurimensile, giorniMese, newDataTo);
         }
 
-        if (giorni >= SogliaMese - 1) // 27 giorni = un mese intero
+        if (giorni >= DurationHelper.SogliaMese - 1) // 27 giorni = un mese intero
             return new DurationResult(DurationHelper.CodiceMese, giorni);
 
         // Weekend: sabato + domenica (2gg) o venerdì + sabato + domenica (3gg)
-        var isWeekend = IsWeekend(dataFrom, dataTo, giorni, venditaGiornoSingoloSuWeekend);
+        var isWeekend = IsWeekend(dataFrom, giorni, venditaGiornoSingoloSuWeekend);
         if (isWeekend)
         {
-            var codiceW = giorni >= GiorniWeekend3g
+            var codiceW = giorni >= DurationHelper.GiorniWeekend3g
                 ? DurationHelper.CodiceWeekend
                 : DurationHelper.CodiceWeekend;
             return new DurationResult(codiceW, giorni);
@@ -58,9 +48,9 @@ public sealed class DurationService : IDurationService
         return new DurationResult(DurationHelper.CodiceGiorno, giorni);
     }
 
-    private static bool IsWeekend(DateTime dataFrom, DateTime dataTo, int giorni, bool venditaGiornoSingoloSuWeekend)
+    private static bool IsWeekend(DateTime dataFrom, int giorni, bool venditaGiornoSingoloSuWeekend)
     {
-        if (giorni > GiorniWeekend3g) return false;
+        if (giorni > DurationHelper.GiorniWeekend3g) return false;
 
         var dow = dataFrom.DayOfWeek;
 
@@ -68,7 +58,7 @@ public sealed class DurationService : IDurationService
         if (dow is DayOfWeek.Friday or DayOfWeek.Saturday or DayOfWeek.Sunday)
         {
             if (giorni == 1 && venditaGiornoSingoloSuWeekend) return true;
-            if (giorni is GiorniWeekend or GiorniWeekend3g)   return true;
+            if (giorni is DurationHelper.GiorniWeekend or DurationHelper.GiorniWeekend3g)   return true;
         }
 
         return false;

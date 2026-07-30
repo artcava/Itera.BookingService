@@ -1,6 +1,7 @@
 using FluentValidation;
 using Itera.BookingService.Application.Abstractions;
 using Itera.BookingService.Application.Estimate.Abstractions;
+using Itera.BookingService.Application.Helpers;
 using Itera.BookingService.Contracts.Estimate;
 using Itera.BookingService.Contracts.General;
 using Microsoft.Extensions.Logging;
@@ -16,13 +17,13 @@ public sealed class EstimateService(
     IValidator<GetAccessoryBookingRequest>  getAccessoryBookingValidator,
     IValidator<GetInsuranceExtraRequest>    getInsuranceExtraValidator,
     IValidator<GetAmountEstimateRequest>    getAmountEstimateValidator,
+    IValidator<GetWholeEstimateRequest>     getWholeEstimateValidator,
     IKmQueryService                         kmQueryService,
     IDurationService                        durationService,
     IProvinceQueryService                   provinceQueryService,
     INationQueryService                     nationQueryService,
-    IEstimateAccessoryQueryService          estimateAccessoryQueryService,
-    IEstimateInsuranceQueryService          estimateInsuranceQueryService,
-    IAmountEstimateParityService            amountEstimateParityService,
+    IEstimateQueryService                   estimateQueryService,
+    IAmountEstimateService                  amountEstimateService,
     ILogger<EstimateService>                logger) : IEstimateService
 {
     private const short BrandScnd = 2;
@@ -39,13 +40,7 @@ public sealed class EstimateService(
     {
         var validation = await getAllCategorieValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-            return new ApiResponse<List<Categoria>>
-            {
-                Esito        = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio    = validation.Errors.First().ErrorMessage,
-                Data         = []
-            };
+            return ResponseHelper.LegacyError<List<Categoria>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var linguaId = ResolveLinguaId(request.Language);
         var lista    = BuildCategorie(linguaId, authContext.BrandId);
@@ -68,13 +63,7 @@ public sealed class EstimateService(
     {
         var validation = await getKmsValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-            return new ApiResponse<List<KmOpzione>>
-            {
-                Esito        = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio    = validation.Errors.First().ErrorMessage,
-                Data         = []
-            };
+            return ResponseHelper.LegacyError<List<KmOpzione>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var dataFrom = ParseDate(request.DataFrom!);
         var dataTo   = ParseDate(request.DataTo!);
@@ -114,12 +103,7 @@ public sealed class EstimateService(
     {
         var validation = await getDefaultValuesValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new ApiResponse<GetDefaultValues>
-            {
-                Esito        = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio    = validation.Errors.First().ErrorMessage
-            };
+            return ResponseHelper.LegacyError<GetDefaultValues>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var dataFrom = DateTime.Today.AddDays(1);
         var dataTo   = DateTime.Today.AddDays(2);
@@ -149,13 +133,7 @@ public sealed class EstimateService(
     {
         var validation = await getProvinceValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new ApiResponse<List<GetProvince>>
-            {
-                Esito        = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio    = validation.Errors.First().ErrorMessage,
-                Data         = []
-            };
+            return ResponseHelper.LegacyError<List<GetProvince>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var province = await provinceQueryService.GetProvinceAsync(ct);
 
@@ -177,13 +155,7 @@ public sealed class EstimateService(
     {
         var validation = await getNationsValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-            return new ApiResponse<List<Nazione>>
-            {
-                Esito        = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio    = validation.Errors.First().ErrorMessage,
-                Data         = []
-            };
+            return ResponseHelper.LegacyError<List<Nazione>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var nazioni = await nationQueryService.GetNationsAsync(request.Language, ct);
 
@@ -205,21 +177,13 @@ public sealed class EstimateService(
     {
         var validation = await getAccessoryBookingValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-        {
-            return new ApiResponse<List<AccessoryBookingDto>>
-            {
-                Esito = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio = validation.Errors.First().ErrorMessage,
-                Data = []
-            };
-        }
+            return ResponseHelper.LegacyError<List<AccessoryBookingDto>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
         var dateFrom = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateFrom, linguaId);
         var dateTo = LegacyRequestCultureDateResolver.ResolveDateEndLegacy(request.DateTo, linguaId);
 
-        var accessories = await estimateAccessoryQueryService.GetAccessoryBookingAsync(
+        var accessories = await estimateQueryService.GetAccessoryBookingAsync(
             authContext.BrandId,
             request.BranchId,
             request.BranchDestinationId,
@@ -251,21 +215,13 @@ public sealed class EstimateService(
     {
         var validation = await getInsuranceExtraValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
-        {
-            return new ApiResponse<List<InsuranceExtraDto>>
-            {
-                Esito = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio = validation.Errors.First().ErrorMessage,
-                Data = []
-            };
-        }
+            return ResponseHelper.LegacyError<List<InsuranceExtraDto>>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
 
         var linguaId = LegacyRequestCultureDateResolver.ResolveLinguaId(request.Language);
         var dateFrom = LegacyRequestCultureDateResolver.ResolveDateStartLegacy(request.DateFrom, linguaId);
         var dateTo = LegacyRequestCultureDateResolver.ResolveDateEndLegacy(request.DateTo, linguaId);
 
-        var insuranceExtras = await estimateInsuranceQueryService.GetInsuranceExtraAsync(
+        var insuranceExtras = await estimateQueryService.GetInsuranceExtraAsync(
             request.SegmentCode,
             dateFrom,
             dateTo,
@@ -293,16 +249,59 @@ public sealed class EstimateService(
     {
         var validation = await getAmountEstimateValidator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
+            return ResponseHelper.LegacyError<AmountEstimateDto>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
+
+        return await amountEstimateService.GetAmountEstimateAsync(request, authContext, cancellationToken);
+    }
+
+    // ------------------------------------------------------------------
+    // GetWholeEstimate
+    // ------------------------------------------------------------------
+
+    public async Task<ApiResponse<EstimateDto>> GetWholeEstimateAsync(
+        GetWholeEstimateRequest request,
+        LegacyAuthContext authContext,
+        CancellationToken cancellationToken)
+    {
+        var validation = await getWholeEstimateValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+            return ResponseHelper.LegacyError<EstimateDto>("VALIDATION_ERROR", validation.Errors.First().ErrorMessage);
+
+        // Legacy fallback from WsValidate.ValidateEstimateToken: 300 seconds when config is missing.
+        var estimateTokenValidation = await estimateQueryService.ValidateEstimateTokenAsync(
+            request.EstimateToken,
+            tokenValidPeriodSeconds: 300,
+            cancellationToken);
+
+        if (estimateTokenValidation.ValidationCode < 0)
         {
-            return new ApiResponse<AmountEstimateDto>
+            return estimateTokenValidation.ValidationCode switch
             {
-                Esito = false,
-                CodiceErrore = "VALIDATION_ERROR",
-                Messaggio = validation.Errors.First().ErrorMessage
+                -1 => ResponseHelper.LegacyError<EstimateDto>(-312, "Estimate token already in use"),
+                -2 => ResponseHelper.LegacyError<EstimateDto>(-101, "Estimate token has expired"),
+                _ => ResponseHelper.LegacyError<EstimateDto>(-309, "An error occurred while retrieving the estimate")
             };
         }
 
-        return await amountEstimateParityService.GetAmountEstimateAsync(request, authContext, cancellationToken);
+
+        var wholeEstimate = await estimateQueryService.GetWholeEstimateAsync(
+            request.BrandID,
+            request.EstimateToken,
+            request.SegmentCode,
+            request.KmType,
+            request.InsuranceExtraList,
+            request.InsuranceList,
+            request.AccessoryList,
+            request.BookingCode,
+            request.Prepaid,
+            cancellationToken);
+
+        logger.LogInformation(
+            "GetWholeEstimate resolved for SegmentCode {SegmentCode} WsUserID {WsUserId}",
+            request.SegmentCode,
+            authContext.WsUserId);
+
+        return ApiResponse<EstimateDto>.Ok(wholeEstimate);
     }
 
     private static DateTime ParseDate(string value) =>
